@@ -24,17 +24,10 @@ const PostExcerpt = ({ post }: { post: Post }) => {
 }
 
 export const PostsList = () => {
-  const dispatch = useDispatch()
   const posts = useSelector(selectAllPosts)
 
   const postsStatus = useSelector((state:RootState) => state.posts.status)
   const error = useSelector((state:RootState) => state.posts.error)
-
-  useEffect(() => {
-    if (postsStatus === 'idle') {
-      dispatch(FetchPosts())
-    }
-  }, [postsStatus, dispatch])
 
   let content
 

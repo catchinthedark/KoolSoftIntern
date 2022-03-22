@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { useSelector } from 'react-redux'
 import { RootState } from '../../app/store'
 
 export interface Post {
@@ -13,12 +14,6 @@ const initialState = {
   status: 'idle',
   error: null
 }
-
-export const FetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
-  const response = await fetch("posts.json")
-  const data = await response.json()
-  return data
-})
 
 const postsSlice = createSlice({
   name: 'posts',
@@ -40,20 +35,20 @@ const postsSlice = createSlice({
       builder
         .addCase(FetchPosts.pending, (state:RootState, action: any) => {
           return {
-            ...state,
+            state,
             status : 'loading'
           }
         })
         .addCase(FetchPosts.fulfilled, (state:RootState, action: any) => {
           return {
-            ...state,
+            state,
             status : 'succeeded',
             posts : action.payload
           }
         })
         .addCase(FetchPosts.rejected, (state:RootState, action: any) => {
           return {
-            ...state,
+            state,
             status : 'failed',
             posts : action.error.message
           }
@@ -64,8 +59,23 @@ const postsSlice = createSlice({
 
 export const selectAllPosts = (state:RootState) => state.posts.posts
 
-export const selectPostById = (state:RootState, postId:number) =>
-  state.posts.posts.find(post => post.id === postId)
+export const selectPostById = (state:RootState, postId:number) => {
+  console.log("select post by id")
+  console.log(postId)
+  console.log(state.posts.posts)
+  console.log(typeof state.posts.posts)
+  return state.posts.posts.find(post => post.id === postId)
+}
+
+export const FetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
+  const posts = useSelector(selectAllPosts)
+  if (posts == null) {
+    const response = await fetch("posts.json")
+    const data = await response.json()
+    return data
+  }
+  return 
+})
 
 export const { postAdded, postUpdated } = postsSlice.actions
 

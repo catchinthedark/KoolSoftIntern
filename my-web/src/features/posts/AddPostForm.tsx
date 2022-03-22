@@ -18,10 +18,10 @@ export const AddPostForm = () => {
   const onSavePostClicked = () => {
     dispatch(
       postAdded({
-        userId,
-        id: parseInt(nanoid()),
-        title,
-        body
+        "userId": userId,
+        "id": Date.now() + Math.random(),
+        "title": title,
+        "body": body
       })
     )
 

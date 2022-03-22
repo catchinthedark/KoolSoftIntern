@@ -7,14 +7,20 @@ import { Provider } from 'react-redux';
 import * as serviceWorker from './serviceWorker';
 import { FetchUsers } from './features/users/usersSlice'
 import { FetchPosts } from './features/posts/postsSlice';
+import { persistStore } from 'redux-persist';
+import { PersistGate } from 'redux-persist/integration/react';
 
 store.dispatch(FetchUsers())
 store.dispatch(FetchPosts())
 
+let persistor = persistStore(store);
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+        <PersistGate persistor={persistor}>
+          <App />
+        </PersistGate>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')
