@@ -50,7 +50,7 @@ const postsSlice = createSlice({
           return {
             state,
             status : 'failed',
-            posts : action.error.message
+            error : action.error.message
           }
         })
     }
@@ -60,10 +60,6 @@ const postsSlice = createSlice({
 export const selectAllPosts = (state:RootState) => state.posts.posts
 
 export const selectPostById = (state:RootState, postId:number) => {
-  console.log("select post by id")
-  console.log(postId)
-  console.log(state.posts.posts)
-  console.log(typeof state.posts.posts)
   return state.posts.posts.find(post => post.id === postId)
 }
 

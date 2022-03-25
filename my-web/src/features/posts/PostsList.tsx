@@ -15,7 +15,6 @@ const PostExcerpt = ({ post }: { post: Post }) => {
         <PostAuthor userId={post.userId} />
       </div>
       <p className="post-body">{post.body.substring(0, 100)}</p>
-
       <Link to={`/posts/${post.id}`} className="button muted-button">
         View Post
       </Link>
