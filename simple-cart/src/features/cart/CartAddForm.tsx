@@ -7,7 +7,6 @@ import { itemAdded } from "./cartSlice"
 
 
 const CartAddForm = () => {
-    console.log("cart add!")
     const { productId } = useParams()
     const product = useSelector((state: RootState) => selectProductById(state, parseFloat(productId!)))
 

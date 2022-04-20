@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const profile_1 = require("../../controllers/profile");
+const errorHandling_1 = require("../../middlewares/errorHandling");
+const router = (0, express_1.Router)();
+router.get('/all', (0, errorHandling_1.asyncHandler)(profile_1.getProfiles));
+router.get('/:username', (0, errorHandling_1.asyncHandler)(profile_1.getProfileByUsername));
+router.post('/add', (0, errorHandling_1.asyncHandler)(profile_1.addProfile));
+router.put('/update/:id', (0, errorHandling_1.asyncHandler)(profile_1.updateProfile));
+router.delete('/delete/:id', (0, errorHandling_1.asyncHandler)(profile_1.deleteProfile));
+exports.default = router;

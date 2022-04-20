@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { RootState } from '../../app/store'
 
 export interface Product {
-    "id": number,
+    "id": number,                
     "title": string,
     "price": string,
     "category": string,
@@ -75,7 +75,6 @@ export const fetchProducts = createAsyncThunk('fetch-products', async () => {
     const data = await response.json()
     return data
 })
-
 
 export const { productAdded, productUpdated, productRemoved } = productsSlice.actions
 export default productsSlice.reducer

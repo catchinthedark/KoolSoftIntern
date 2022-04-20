@@ -1,11 +1,10 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import storage from 'redux-persist/lib/storage';
 import { combineReducers } from 'redux';
 import { persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 
-import ProductsReducer from '../features/products/productsSlice'
-import CartReducer from '../features/cart/cartSlice'
-import UserReducer from '../features/users/usersSlice'
+import accountsSlice from '../features/account/accountsSlice';
+import meSlice from '../features/me/meSlice';
 
 const persistConfig = {
   key: 'primary',
@@ -13,9 +12,8 @@ const persistConfig = {
 }
 
 const reducers = combineReducers({
-    products: ProductsReducer,
-    cart: CartReducer,
-    users: UserReducer
+  accounts: accountsSlice,
+  me: meSlice
 })
 
 const persistedReducer = persistReducer(persistConfig, reducers)

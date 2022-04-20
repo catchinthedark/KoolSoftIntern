@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const account_1 = require("../../controllers/account");
+const errorHandling_1 = require("../../middlewares/errorHandling");
+const router = (0, express_1.Router)();
+router.get('/all', (0, errorHandling_1.asyncHandler)(account_1.getAccounts));
+router.post('/add', (0, errorHandling_1.asyncHandler)(account_1.addAccount));
+router.put('/update/:id', (0, errorHandling_1.asyncHandler)(account_1.updateAccount));
+router.delete('/delete/:id', (0, errorHandling_1.asyncHandler)(account_1.deleteAccount));
+exports.default = router;

@@ -1,0 +1,59 @@
+* {
+    padding: 0;
+    margin: 10px;
+    box-sizing: border-box;
+  }
+  
+  /* NAVBAR */
+  .navbar {
+    height: 80px;
+    background-color:darkolivegreen;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4rem;
+  }
+  
+  .navbar h1 {
+    font-size: 50px;
+    color: white;
+  }
+  
+  .navitem {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 0 -2rem;
+  }
+
+  /* FORM */
+  .form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 0 20rem;
+    padding: 0 4rem;
+  }
+
+  /* CARD */
+  .card {
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    height: 400px;
+    width: 300px;
+    display: flex;
+  }
+
+  .card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  }
+
+  /* LIST */
+  .list {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    justify-content: space-around;
+  }
