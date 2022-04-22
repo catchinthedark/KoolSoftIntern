@@ -13,12 +13,12 @@ var __rest = (this && this.__rest) || function (s, e) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.serverErrorResponse = exports.failureResponse = exports.successResponse = void 0;
 const successResponse = (res, data) => {
-    res.json({ status: true, data });
+    res.json({ success: true, data });
 };
 exports.successResponse = successResponse;
 const failureResponse = (res, _a = {}) => {
     var payload = __rest(_a, []);
-    res.json(Object.assign({ status: false }, payload));
+    res.json(Object.assign({ success: false }, payload));
 };
 exports.failureResponse = failureResponse;
 const serverErrorResponse = (res, status, _a = {}) => {

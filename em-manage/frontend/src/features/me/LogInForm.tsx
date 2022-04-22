@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { AES } from 'crypto-js'
 import { message } from 'antd'
-import { fetchMe, SelectLoginError } from "../features/me/meSlice"
+import { fetchMe, SelectLoginError } from "./meSlice"
 
 const LogInForm = () => {
     const [username, setUsername] = useState('')
@@ -26,8 +26,7 @@ const LogInForm = () => {
           })
             .then((res) => res.json())
             .then((rspBody) => {
-              console.log('login done')
-              if (!rspBody.status) message.error(rspBody.data) 
+              if (!rspBody.success) message.error(rspBody.data) 
                 else {
                     dispatch(fetchMe())
                     navigate('/')

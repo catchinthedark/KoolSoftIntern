@@ -1,11 +1,11 @@
 import { Response } from "express";
 
 export const successResponse = (res: Response, data?: any) => {
-  res.json({ status: true, data });
+  res.json({ success: true, data });
 }
 
 export const failureResponse = (res: Response, { ...payload }: any = {}) => {
-  res.json({ status: false, ...payload });
+  res.json({ success: false, ...payload });
 }
 
 export const serverErrorResponse = (res: Response, status: number, { ...payload }: any = {}) => {

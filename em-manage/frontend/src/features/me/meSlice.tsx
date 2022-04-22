@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { RootState } from "../../app/store"
-import API from "../../utils/api"
 import { Account } from "../account/accountsSlice"
-import Cookies from "js-cookie"
+import fetchInterceptors from "../../utils/fetchInterceptors"
 
 export const accountDefault: Account = {
     _id: '',
@@ -26,7 +25,7 @@ const meSlice = createSlice({
     initialState,
     reducers: {
         logout(state, action) {
-            console.log('in logout reducer...')
+            console.log('logging out...')
             return {
                 ...state,
                 me: accountDefault,
@@ -70,9 +69,14 @@ export const SelectMeStatus = (state: RootState) => state.me.status
 export const SelectLoginError = (state: RootState) => state.me.error
 
 export const fetchMe = createAsyncThunk('fetch-me', async () => {
-    const username = Cookies.get('username')
-    const response = await API.get(`${process.env.REACT_APP_BASE_URL}/auth/getMe/${username}`)
-    return response.data.data
+    const { success, data } = await fetchInterceptors({
+        url: "/account/me",
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`
+      });
+    if (success) {
+        return data;
+    }
+    return null;
 })
 
 export const { logout } = meSlice.actions

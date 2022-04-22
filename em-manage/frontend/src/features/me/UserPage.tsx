@@ -1,9 +1,9 @@
 import { message } from "antd"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { logout, SelectMe } from "../features/me/meSlice"
+import { logout, SelectMe } from "./meSlice"
 
-const UserPage = () => {
+const UserPage = ()=> {
     useDispatch()
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -12,13 +12,12 @@ const UserPage = () => {
 
     const onLogOutClicked = async () => {
         fetch(`${process.env.REACT_APP_BASE_URL}/auth/logout`, {
-            method: "POST",
+            method: "GET",
             headers: { "Content-Type": "application/json" },
             credentials: 'include'
           }).then((res) => res.json())
           .then((rspBody) => {
-              if (rspBody.status) {
-                console.log('loging out...')
+              if (rspBody.success) {
                 dispatch(logout({me}))
                 navigate('/')
               } else {

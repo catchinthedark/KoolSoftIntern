@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import { AES } from 'crypto-js'
 
-export const enncryptPassword = async (plainPassword: string) => {
+export const encryptPassword = async (plainPassword: string) => {
     const salt = await bcrypt.genSalt(10)
     const hashPassword = await bcrypt.hash(plainPassword, salt)
     return hashPassword

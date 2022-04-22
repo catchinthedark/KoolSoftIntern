@@ -7,7 +7,9 @@ const HomePage = () => {
 
     const isLogin = useSelector(SelectLoginStatus)
     const me = useSelector(SelectMe)
-    if (isLogin && me === accountDefault) dispatch(fetchMe())
+    if (isLogin && me === accountDefault) {
+        dispatch(fetchMe())
+    }
 
     return (
       <div>

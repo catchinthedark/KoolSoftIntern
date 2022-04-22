@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { AES } from 'crypto-js'
 import { message } from 'antd'
-import { PersonalInfo, ContactInfo } from "../features/account/accountsSlice"
+import { PersonalInfo, ContactInfo } from "./accountsSlice"
 
 const SignUpForm = () => {
     const [username, setUsername] = useState<string>('')
@@ -42,7 +42,7 @@ const SignUpForm = () => {
                 phone,
                 address
             }
-            fetch(`${process.env.REACT_APP_BASE_URL}/account/add`, {
+            fetch(`${process.env.REACT_APP_BASE_URL}/auth/register`, {
                 method: "POST",
                 body: JSON.stringify({
                   username,
@@ -56,9 +56,8 @@ const SignUpForm = () => {
               })
             .then((res) => res.json())
             .then((rspBody) => {
-                console.log('sign up done')
-                if (!rspBody.status) {
-                    message.error(rspBody.data) 
+                if (!rspBody.success) {
+                    message.error(rspBody.message) 
                     navigate('/signup')
                 } else {
                     navigate('/login')

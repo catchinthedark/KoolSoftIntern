@@ -2,15 +2,26 @@ import './App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 import NavBar from './view/NavBar';
-import LogInForm from './view/LogInForm';
-import UserPage from './view/UserPage';
-import SignUpForm from './view/SignUpForm';
+import LogInForm from './features/me/LogInForm';
+import UserPage from './features/me/UserPage';
+import SignUpForm from './features/account/SignUpForm';
 import HomePage from './view/HomePage';
-import { useSelector } from 'react-redux';
-import { SelectLoginStatus } from './features/me/meSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchMe, logout, SelectLoginStatus, SelectMe } from './features/me/meSlice';
+import Cookies from 'js-cookie';
 
 function App() {
+  const dispatch = useDispatch()
+
   const isLogin = useSelector(SelectLoginStatus)
+  const me = useSelector(SelectMe)
+  const loginStatus = Cookies.get('isLogin')
+  if (isLogin===true && loginStatus==='false') {
+    dispatch(logout({ me }))
+  }
+  if (isLogin===false && loginStatus==='true') {
+    dispatch(fetchMe())
+  }
 
   return (
     <Router>

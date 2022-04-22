@@ -12,10 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMe = exports.logout = exports.login = void 0;
+exports.getRefreshToken = exports.getAccessToken = exports.refreshToken = exports.register = exports.logout = exports.login = void 0;
 const account_1 = __importDefault(require("../../models/account"));
+const accountToken_1 = __importDefault(require("../../models/accountToken"));
 const error_1 = require("../../common/error");
 const auth_1 = require("../../middlewares/auth");
+const response_1 = require("../../common/response");
+const jwtHelper_1 = require("../../middlewares/jwtHelper");
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     const account = yield account_1.default.findOne({ username: body.username });
@@ -24,23 +27,77 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, auth_1.comparePassword)(account.password, (0, auth_1.decryptPassword)(body.password));
     if (!result)
         throw new error_1.ServerError({ data: -1 });
-    console.log('login success');
+    const accessToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, username: account.username } });
+    const refreshToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, username: account.username }, type: 'refreshToken' });
+    yield accountToken_1.default.findOneAndUpdate({ accountID: account._id }, { $set: { accessToken, refreshToken } }).exec();
+    const response = {
+        accountID: account._id,
+        username: account.username
+    };
+    const cookieOptions = { httpOnly: true };
+    res.cookie('x-access-token', accessToken, Object.assign({}, cookieOptions /*, maxAge: 1000 * 60 * 60 * 24 * 365*/));
+    res.cookie('x-refresh-token', refreshToken, Object.assign({}, cookieOptions /*, maxAge: 1000 * 60 * 60 * 24 * 365*/));
     res.cookie('isLogin', true);
-    res.cookie('username', account.username);
-    res.send({ data: body.username, status: true });
+    console.log('login success');
+    return (0, response_1.successResponse)(res, response);
 });
 exports.login = login;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const credentials = req.credentials;
+    if (credentials) {
+        const accountID = credentials.accountID;
+        yield accountToken_1.default.findOneAndUpdate({ accountID }, { $set: { accessToken: null, refreshToken: null } }, { new: true });
+    }
+    res.clearCookie('x-access-token');
+    res.clearCookie('x-refresh-token');
     res.cookie('isLogin', false);
-    res.cookie('username', '');
     console.log('logout success');
-    res.send({ message: 'logout success', status: true });
+    return (0, response_1.successResponse)(res);
 });
 exports.logout = logout;
-const getMe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const account = yield account_1.default.findOne({ username: req.params.username });
-    if (!account)
-        throw new error_1.ServerError({ data: -1 });
-    res.send({ data: account, status: true });
+const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const body = req.body;
+    const foundAccount = yield account_1.default.findOne({ username: body.username });
+    if (foundAccount)
+        throw new error_1.ServerError({ data: -2 });
+    const password = yield (0, auth_1.encryptPassword)((0, auth_1.decryptPassword)(body.password));
+    const account = new account_1.default({
+        username: body.username,
+        password: password,
+        role: body.role,
+        personalInfo: body.personalInfo,
+        contactInfo: body.contactInfo,
+        url: body.url
+    });
+    const newAccount = yield account.save();
+    const accountToken = new accountToken_1.default({
+        accountID: account._id
+    });
+    const newAccountToken = yield accountToken.save();
+    const response = {
+        accountID: account._id,
+        username: account.username
+    };
+    return (0, response_1.successResponse)(res, response);
 });
-exports.getMe = getMe;
+exports.register = register;
+const refreshToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const credentials = req.credentials;
+    const accessToken = yield (0, exports.getRefreshToken)({ accountID: credentials === null || credentials === void 0 ? void 0 : credentials.accountID });
+    const cookieOptions = { httpOnly: true };
+    res.cookie('x-access-token', accessToken, Object.assign({}, cookieOptions /*, maxAge: 1000 * 60 * 60 * 24 * 365*/));
+    return (0, response_1.successResponse)(res);
+});
+exports.refreshToken = refreshToken;
+const getAccessToken = (args) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const accountToken = yield accountToken_1.default.findOne({ accountID: args.accountID });
+    return (_a = accountToken === null || accountToken === void 0 ? void 0 : accountToken.get("accessToken")) !== null && _a !== void 0 ? _a : '';
+});
+exports.getAccessToken = getAccessToken;
+const getRefreshToken = (args) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    const accountToken = yield accountToken_1.default.findOne({ accountID: args.accountID });
+    return (_b = accountToken === null || accountToken === void 0 ? void 0 : accountToken.get("refreshToken")) !== null && _b !== void 0 ? _b : '';
+});
+exports.getRefreshToken = getRefreshToken;

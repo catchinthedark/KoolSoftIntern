@@ -1,9 +1,14 @@
-import { Response, Request } from "express";
+import { Response, Request } from "express"
+import { startSession, ObjectId } from 'mongoose'
+import { AuthRequest } from '../../common/request'
 import Account from "../../types/account"
-import accountModel from "../../models/account";
-import { ServerError } from "../../common/error";
-import { comparePassword, decryptPassword } from "../../middlewares/auth";
-import { successResponse } from "../../common/response";
+import accountModel from "../../models/account"
+import accountTokenModel from "../../models/accountToken"
+import { ServerError } from "../../common/error"
+import { comparePassword, decryptPassword, encryptPassword } from "../../middlewares/auth"
+import { successResponse } from "../../common/response"
+import { signCredentials } from "../../middlewares/jwtHelper"
+import AccountToken from "../../types/accountToken"
 
 export const login = async (req: Request, res: Response): Promise<void> => {
     const body = req.body as Pick<Account, "username" | "password">
@@ -11,21 +16,81 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!account) throw new ServerError({ data: -1 })
     const result = await comparePassword(account.password, decryptPassword(body.password))
     if (!result) throw new ServerError({ data: -1 })
-    console.log('login success')
+
+    const accessToken = signCredentials({ credentials: { accountID: account._id, username: account.username } })
+    const refreshToken = signCredentials({ credentials: { accountID: account._id, username: account.username }, type: 'refreshToken' })
+    await accountTokenModel.findOneAndUpdate({ accountID: account._id }, { $set: { accessToken, refreshToken } }).exec()
+
+    const response = {
+        accountID: account._id, 
+        username: account.username
+    }
+    const cookieOptions = { httpOnly: true }
+    res.cookie('x-access-token', accessToken, { ...cookieOptions/*, maxAge: 1000 * 60 * 60 * 24 * 365*/ })
+    res.cookie('x-refresh-token', refreshToken, { ...cookieOptions/*, maxAge: 1000 * 60 * 60 * 24 * 365*/ })
     res.cookie('isLogin', true)
-    res.cookie('username', account.username)
-    res.send({ data: body.username, status: true })
+
+    console.log('login success')
+    return successResponse(res, response)
 }
 
-export const logout = async (req: Request, res: Response): Promise<void> => {
+export const logout = async (req: AuthRequest, res: Response): Promise<void> => {
+    const credentials = req.credentials
+    if (credentials) {
+      const accountID = credentials.accountID
+      await accountTokenModel.findOneAndUpdate({ accountID }, { $set: { accessToken: null, refreshToken: null } }, { new: true })
+    }
+    res.clearCookie('x-access-token')
+    res.clearCookie('x-refresh-token')
     res.cookie('isLogin', false)
-    res.cookie('username', '')
+
     console.log('logout success')
-    res.send({ message:'logout success', status: true })
+    return successResponse(res)
 }
 
-export const getMe = async (req: Request, res: Response): Promise<void> => {
-    const account = await accountModel.findOne({ username: req.params.username })
-    if (!account) throw new ServerError({ data: -1 })
-    res.send({ data: account, status: true })
+export const register = async (req: Request, res: Response): Promise<void> => {
+    const body = req.body as Pick<Account, "username" | "password" | "role" | "personalInfo" | "contactInfo" | "url">
+    const foundAccount : Account | null = await accountModel.findOne({username: body.username})
+    if (foundAccount) throw new ServerError({ data: -2 })
+
+    const password = await encryptPassword(decryptPassword(body.password))
+    const account : Account = new accountModel({
+        username: body.username,
+        password: password,
+        role: body.role,
+        personalInfo: body.personalInfo,
+        contactInfo: body.contactInfo,
+        url: body.url
+    })    
+    const newAccount : Account = await account.save()
+    const accountToken : AccountToken = new accountTokenModel({
+        accountID: account._id
+    })
+    const newAccountToken : AccountToken = await accountToken.save()
+
+    const response = {
+        accountID: account._id, 
+        username: account.username
+    }
+    return successResponse(res, response)
 }
+
+export const refreshToken = async (req: AuthRequest, res: Response): Promise<void> => {
+    const credentials = req.credentials
+    const accessToken = await getRefreshToken({ accountID: credentials?.accountID! })
+
+    const cookieOptions = { httpOnly: true }
+    res.cookie('x-access-token', accessToken, { ...cookieOptions/*, maxAge: 1000 * 60 * 60 * 24 * 365*/ })
+
+    return successResponse(res)
+}
+
+export const getAccessToken = async (args: { accountID: ObjectId }) => {
+    const accountToken = await accountTokenModel.findOne({ accountID: args.accountID });
+    return accountToken?.get("accessToken") ?? '';
+}
+
+export const getRefreshToken = async (args: { accountID: ObjectId }) => {
+    const accountToken = await accountTokenModel.findOne({ accountID: args.accountID });
+    return accountToken?.get("refreshToken") ?? '';
+ }

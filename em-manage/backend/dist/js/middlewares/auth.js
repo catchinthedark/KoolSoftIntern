@@ -12,15 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.decryptPassword = exports.comparePassword = exports.enncryptPassword = void 0;
+exports.decryptPassword = exports.comparePassword = exports.encryptPassword = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const crypto_js_1 = require("crypto-js");
-const enncryptPassword = (plainPassword) => __awaiter(void 0, void 0, void 0, function* () {
+const encryptPassword = (plainPassword) => __awaiter(void 0, void 0, void 0, function* () {
     const salt = yield bcrypt_1.default.genSalt(10);
     const hashPassword = yield bcrypt_1.default.hash(plainPassword, salt);
     return hashPassword;
 });
-exports.enncryptPassword = enncryptPassword;
+exports.encryptPassword = encryptPassword;
 const comparePassword = (hashPassword, plainPassword) => __awaiter(void 0, void 0, void 0, function* () {
     const res = yield bcrypt_1.default.compare(plainPassword, hashPassword);
     return res;

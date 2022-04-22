@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { RootState } from "../../app/store"
-import API from "../../utils/api"
+import fetchInterceptors from "../../utils/fetchInterceptors"
 
 export type PersonalInfo = {
     name: String,
@@ -65,8 +65,12 @@ const accountsSlice = createSlice({
 })
 
 export const fetchAllAccounts = createAsyncThunk('fetch-all', async () => {
-    const response = await API.get(`${process.env.REACT_APP_BASE_URL}/account/`)
-    return response
+    const { success, data } = await fetchInterceptors({
+        url: "/account/",
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`
+      });
+    if (success) return data;
+    return null;
 })
 
 export default accountsSlice.reducer

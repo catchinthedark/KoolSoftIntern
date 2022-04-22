@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { RootState } from "../../app/store"
-import API from "../../utils/api"
+import fetchInterceptors from "../../utils/fetchInterceptors"
 
 export type WorkInfo = {
     department: String,
@@ -83,8 +83,12 @@ const profileSlice = createSlice({
 
 export const fetchProfile = createAsyncThunk('fetch-profile', async (state: RootState) => {
     const username = (state: RootState) => state.me.me.username
-    const response = await API.get(`${process.env.REACT_APP_BASE_URL}/profile/${username}`)
-    return response
+    const { success, data } = await fetchInterceptors({
+        url: `/profile/${username}`,
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`
+      });
+    if (success) return data;
+    return null;
 })
 
 export default profileSlice.reducer

@@ -1,4 +1,4 @@
-import { Document, ObjectId } from 'mongoose'
+import { Document } from 'mongoose'
 
 type PersonalInfo = {
     name: string,

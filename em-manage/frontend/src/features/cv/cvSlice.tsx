@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { RootState } from "../../app/store"
-import API from "../../utils/api"
+import fetchInterceptors from "../../utils/fetchInterceptors"
 import { PastWork, PastDegree } from '../profile/profileSlice'
 
 interface CV {
@@ -64,8 +64,12 @@ const cvSlice = createSlice({
 
 export const fetchCV = createAsyncThunk('fetch-cv', async (state: RootState) => {
     const username = (state: RootState) => state.me.me.username
-    const response = await API.get(`${process.env.REACT_APP_BASE_URL}/cv/${username}`)
-    return response
+    const { success, data } = await fetchInterceptors({
+        url: `/cv/${username}`,
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`
+      });
+    if (success) return data;
+    return null;
 })
 
 export default cvSlice.reducer
