@@ -2,8 +2,8 @@ import { message } from "antd"
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { Account, ContactInfo, PersonalInfo, resetAccounts, SelectAllAccounts, updateAccounts } from "../features/account/accountsSlice"
-import { Profile, PastWork, updateProfiles, CVNote, WorkInfo, PastDegree, SelectAllProfiles, resetProfiles } from "../features/profile/profilesSlice"
+import { Account, ContactInfo, PersonalInfo, resetAccounts, updateAccounts } from "../features/account/accountsSlice"
+import { Profile, PastWork, updateProfiles, CVNote, WorkInfo, PastDegree, resetProfiles } from "../features/profile/profilesSlice"
 import { logout, SelectMe, updateMe, updateMyProfile } from "../features/me/meSlice"
 import fetchInterceptors from '../utils/fetchInterceptors'
 

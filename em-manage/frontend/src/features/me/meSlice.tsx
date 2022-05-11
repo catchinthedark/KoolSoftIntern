@@ -118,16 +118,24 @@ export const SelectRole = (state: RootState) => state.me.me.role
 
 export const fetchMe = createAsyncThunk('fetch-me', async (accountID: string) => {
     const { success, data } = await fetchInterceptors({
-        url: `/account/${accountID}`,
-        baseUrl: `${process.env.REACT_APP_BASE_URL}`
+        method: 'PUT',
+        url: `/account/get`,
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`,
+        body: {
+            _id: accountID
+        }
     });
     return data
 })
 
 export const fetchMyProfile = createAsyncThunk('fetch-profile', async(accountID: string) => {
     const { success, data } = await fetchInterceptors({
-        url: `/profile/${accountID}`,
-        baseUrl: `${process.env.REACT_APP_BASE_URL}`
+        method: 'PUT',
+        url: `/profile/get`,
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`,
+        body: {
+            accountID
+        }
     });
     return data
 })

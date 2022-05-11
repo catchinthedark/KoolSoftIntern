@@ -7,6 +7,6 @@ const jwtHelper_1 = require("../../middlewares/jwtHelper");
 const router = (0, express_1.Router)();
 router.get('/all', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(account_1.getAccounts));
 router.put('/update/', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(account_1.updateAccount));
-router.delete('/delete/:id', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(account_1.deleteAccount));
-router.get('/:id', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(account_1.getAccount));
+router.delete('/delete', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(account_1.deleteAccount));
+router.put('/get', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(account_1.getAccount));
 exports.default = router;

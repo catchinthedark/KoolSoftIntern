@@ -6,7 +6,7 @@ const errorHandling_1 = require("../../middlewares/errorHandling");
 const jwtHelper_1 = require("../../middlewares/jwtHelper");
 const router = (0, express_1.Router)();
 router.get('/all', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(profile_1.getProfiles));
-router.get('/:id', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(profile_1.getProfile));
+router.put('/get', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(profile_1.getProfile));
 router.put('/update', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(profile_1.updateProfile));
 router.delete('/delete/:id', jwtHelper_1.verifyTokenMiddleware, (0, errorHandling_1.asyncHandler)(profile_1.deleteProfile));
 exports.default = router;

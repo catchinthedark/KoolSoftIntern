@@ -27,11 +27,8 @@ const getProfiles = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getProfiles = getProfiles;
 const getProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { accountID, role } = req.credentials;
-    let thisAccountID = accountID;
-    const _id = new mongoose_1.default.Types.ObjectId(req.params.id);
-    if (role === 'HR' && thisAccountID !== _id)
-        thisAccountID = _id;
-    const profile = yield profile_1.default.findOne({ accountID: thisAccountID });
+    const body = req.body;
+    const profile = yield profile_1.default.findOne({ accountID: body.accountID });
     if (!profile)
         return (0, response_1.failureResponse)(res, { data: -2 });
     return (0, response_1.successResponse)(res, profile);

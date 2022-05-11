@@ -16,10 +16,8 @@ export const getProfiles = async (req: AuthRequest, res: Response): Promise<void
 
 export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
     const { accountID, role } = req.credentials!;
-    let thisAccountID = accountID
-    const _id = new mongoose.Types.ObjectId(req.params.id)
-    if (role === 'HR' && thisAccountID !== _id) thisAccountID = _id
-    const profile: Profile | null = await profileModel.findOne({accountID: thisAccountID})
+    const body = req.body as Pick<Profile, "accountID">
+    const profile: Profile | null = await profileModel.findOne({accountID: body.accountID})
     if (!profile) return failureResponse(res, { data: -2 })
     return successResponse(res, profile)
 }

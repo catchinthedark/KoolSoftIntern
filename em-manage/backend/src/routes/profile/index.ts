@@ -6,7 +6,7 @@ import { verifyTokenMiddleware } from "../../middlewares/jwtHelper";
 const router: Router = Router()
 
 router.get('/all', verifyTokenMiddleware, asyncHandler(getProfiles))
-router.get('/:id', verifyTokenMiddleware, asyncHandler(getProfile))
+router.put('/get', verifyTokenMiddleware, asyncHandler(getProfile))
 router.put('/update', verifyTokenMiddleware, asyncHandler(updateProfile))
 router.delete('/delete/:id', verifyTokenMiddleware, asyncHandler(deleteProfile))
 

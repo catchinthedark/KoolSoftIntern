@@ -7,7 +7,7 @@ const router: Router = Router()
 
 router.get('/all', verifyTokenMiddleware, asyncHandler(getAccounts))
 router.put('/update/', verifyTokenMiddleware, asyncHandler(updateAccount))
-router.delete('/delete/:id', verifyTokenMiddleware, asyncHandler(deleteAccount))
-router.get('/:id', verifyTokenMiddleware, asyncHandler(getAccount))
+router.delete('/delete', verifyTokenMiddleware, asyncHandler(deleteAccount))
+router.put('/get', verifyTokenMiddleware, asyncHandler(getAccount))
 
 export default router

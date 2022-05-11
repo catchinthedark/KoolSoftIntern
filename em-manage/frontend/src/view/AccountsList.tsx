@@ -1,15 +1,37 @@
-import { Account, SelectAccountsError, SelectAccountsStatus, SelectAllAccounts } from "../features/account/accountsSlice"
+import { Account, SelectAccountsError, SelectAccountsStatus, SelectAllAccounts, updateAccounts } from "../features/account/accountsSlice"
 import { Spinner } from "../utils/spinner"
-import { useSelector } from "react-redux"
-import { SelectProfileByAccount } from "../features/profile/profilesSlice"
+import { useDispatch, useSelector } from "react-redux"
+import { SelectProfileByAccount, updateProfiles } from "../features/profile/profilesSlice"
 import UserPage from "./UserPage"
 import { RootState } from "../app/store"
 import { SelectMe } from "../features/me/meSlice"
 import { useState } from "react"
+import fetchInterceptors from "../utils/fetchInterceptors"
+import { useNavigate } from "react-router-dom"
+import { message } from "antd"
 
 const AccountPreview = ({ account } : { account: Account }) => {
+    const dispatch = useDispatch()
     const [openFlag, setOpenFlag] = useState<boolean>(false)
     const profile = useSelector((state: RootState) => SelectProfileByAccount(account, state))
+
+    const onRemoveAccountClicked = async() => {
+        const {success, data} = await fetchInterceptors({
+            method: 'DELETE',
+            url: `/account/delete`,
+            baseUrl: `${process.env.REACT_APP_BASE_URL}`,
+            body: {
+                _id: account._id
+            }
+        })
+        if (success) {
+            dispatch(updateAccounts(data.accounts))
+            dispatch(updateProfiles(data.profiles))
+        } else {
+            message.error(data)
+        }
+    }
+
     return (
         <fieldset className="element">
             <legend>{account.username}</legend>
@@ -19,6 +41,9 @@ const AccountPreview = ({ account } : { account: Account }) => {
                 View Account
             </button>
             { openFlag && <UserPage user={account} profile={profile!} setOpenFlag={setOpenFlag}/>}
+            <button onClick={onRemoveAccountClicked} style={{ padding: '0.5rem 1rem', textDecoration: 'none', color:"white", backgroundColor: "darkolivegreen" }}>
+                Remove Account
+            </button>
         </fieldset>
     )
 }

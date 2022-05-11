@@ -14,7 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAccount = exports.updateAccount = exports.getAccount = exports.getAccounts = void 0;
 const account_1 = __importDefault(require("../../models/account"));
-const mongoose_1 = __importDefault(require("mongoose"));
+const profile_1 = __importDefault(require("../../models/profile"));
+const accountToken_1 = __importDefault(require("../../models/accountToken"));
 const error_1 = require("../../common/error");
 const response_1 = require("../../common/response");
 const getAccounts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -24,11 +25,8 @@ const getAccounts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getAccounts = getAccounts;
 const getAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { accountID, role } = req.credentials;
-    let thisAccountID = accountID;
-    const _id = new mongoose_1.default.Types.ObjectId(req.params.id);
-    if (role === 'HR' && thisAccountID !== _id)
-        thisAccountID = _id;
-    const account = yield account_1.default.findById(thisAccountID);
+    const body = req.body;
+    const account = yield account_1.default.findById(body._id);
     if (!account)
         throw new error_1.ServerError({ data: -1 });
     return (0, response_1.successResponse)(res, account);
@@ -46,13 +44,20 @@ const updateAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 exports.updateAccount = updateAccount;
 const deleteAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { accountID, role } = req.credentials;
+    const body = req.body;
     if (role != 'HR')
         throw new error_1.ForbiddenError({ error: "You don't have permission to do this." });
-    const _Id = new mongoose_1.default.Types.ObjectId(req.params.id);
-    const deletedAccount = yield account_1.default.findByIdAndDelete(_Id);
-    const allAccounts = yield account_1.default.find();
+    const deletedAccount = yield account_1.default.findByIdAndDelete(body._id);
     if (!deletedAccount)
         return (0, response_1.failureResponse)(res, { data: -2 });
-    return (0, response_1.successResponse)(res, { account: deletedAccount, accounts: allAccounts });
+    const allAccounts = yield account_1.default.find();
+    const deletedProfile = yield profile_1.default.findOneAndDelete({ accountID: body._id });
+    if (!deletedProfile)
+        return (0, response_1.failureResponse)(res, { data: -2 });
+    const allProfiles = yield profile_1.default.find();
+    const deletedAccountToken = yield accountToken_1.default.findOneAndDelete({ accountID: body._id });
+    if (!deletedAccountToken)
+        return (0, response_1.failureResponse)(res, { data: -2 });
+    return (0, response_1.successResponse)(res, { accounts: allAccounts, profiles: allProfiles });
 });
 exports.deleteAccount = deleteAccount;

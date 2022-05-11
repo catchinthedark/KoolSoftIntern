@@ -1,10 +1,14 @@
 import { Response, Request } from "express";
 import Account from "../../types/account";
 import accountModel from "../../models/account";
+import profileModel from "../../models/profile";
+import accountTokenModel from "../../models/accountToken";
 import mongoose from "mongoose";
 import { BadRequestError, ForbiddenError, ServerError } from "../../common/error";
 import { AuthRequest } from "../../common/request";
 import { successResponse, failureResponse } from "../../common/response";
+import Profile from "../../types/profile";
+import AccountToken from "../../types/accountToken";
 
 export const getAccounts = async (req: Request, res: Response): Promise<void> => {
     const accounts: Account[] = await accountModel.find()
@@ -13,10 +17,8 @@ export const getAccounts = async (req: Request, res: Response): Promise<void> =>
 
 export const getAccount = async (req: AuthRequest, res: Response): Promise<void> => {
     const { accountID, role } = req.credentials!;
-    let thisAccountID = accountID
-    const _id = new mongoose.Types.ObjectId(req.params.id)
-    if (role === 'HR' && thisAccountID !== _id) thisAccountID = _id
-    const account : Account | null = await accountModel.findById(thisAccountID)
+    const body = req.body as Pick<Account, "_id">
+    const account : Account | null = await accountModel.findById(body._id)
     if (!account) throw new ServerError({ data: -1 });
     return successResponse(res, account);
 }
@@ -33,11 +35,19 @@ export const updateAccount = async (req: Request, res: Response): Promise<void> 
 
 export const deleteAccount = async (req: AuthRequest, res: Response): Promise<void> => {
     const { accountID, role } = req.credentials!;
+    const body = req.body as Pick<Account, "_id">
     if (role != 'HR') throw new ForbiddenError({ error: "You don't have permission to do this."})
-    const _Id = new mongoose.Types.ObjectId(req.params.id)
-    const deletedAccount : Account | null = await accountModel.findByIdAndDelete(_Id)
-    const allAccounts: Account[] = await accountModel.find()
+    const deletedAccount : Account | null = await accountModel.findByIdAndDelete(body._id)
     if (!deletedAccount) return failureResponse(res, {data: -2})
-    return successResponse(res, { account: deletedAccount, accounts: allAccounts })
+    const allAccounts: Account[] = await accountModel.find()
+
+    const deletedProfile : Profile | null = await profileModel.findOneAndDelete({accountID: body._id})
+    if (!deletedProfile) return failureResponse(res, {data: -2})
+    const allProfiles : Profile[] = await profileModel.find()
+
+    const deletedAccountToken : AccountToken | null = await accountTokenModel.findOneAndDelete({accountID: body._id})
+    if (!deletedAccountToken) return failureResponse(res, {data: -2})
+    
+    return successResponse(res, { accounts: allAccounts, profiles: allProfiles })
 }
 
