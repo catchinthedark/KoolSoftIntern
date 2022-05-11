@@ -19,6 +19,7 @@ const error_1 = require("../../common/error");
 const auth_1 = require("../../middlewares/auth");
 const response_1 = require("../../common/response");
 const jwtHelper_1 = require("../../middlewares/jwtHelper");
+const profile_1 = require("../profile");
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     const account = yield account_1.default.findOne({ username: body.username });
@@ -27,12 +28,12 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, auth_1.comparePassword)(account.password, (0, auth_1.decryptPassword)(body.password));
     if (!result)
         throw new error_1.ServerError({ data: -1 });
-    const accessToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, username: account.username } });
-    const refreshToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, username: account.username }, type: 'refreshToken' });
+    const accessToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, role: account.role } });
+    const refreshToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, role: account.role }, type: 'refreshToken' });
     yield accountToken_1.default.findOneAndUpdate({ accountID: account._id }, { $set: { accessToken, refreshToken } }).exec();
     const response = {
         accountID: account._id,
-        username: account.username
+        role: account.role
     };
     const cookieOptions = { httpOnly: true };
     res.cookie('x-access-token', accessToken, Object.assign({}, cookieOptions /*, maxAge: 1000 * 60 * 60 * 24 * 365*/));
@@ -57,12 +58,19 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.logout = logout;
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
-    const foundAccount = yield account_1.default.findOne({ username: body.username });
+    console.log(body);
+    const foundAccount = yield account_1.default.findOne({ "personalInfo.firstName": body.personalInfo.firstName, "personalInfo.lastName": body.personalInfo.lastName, "contactInfo.email": body.contactInfo.email });
     if (foundAccount)
         throw new error_1.ServerError({ data: -2 });
+    let lastname = '';
+    const text = body.personalInfo.lastName.split(' ');
+    for (const txt of text) {
+        lastname = lastname + txt.substring(0, 1);
+    }
+    const username = (body.personalInfo.firstName + lastname + body.contactInfo.phone.substring(7, 9)).toLowerCase();
     const password = yield (0, auth_1.encryptPassword)((0, auth_1.decryptPassword)(body.password));
     const account = new account_1.default({
-        username: body.username,
+        username: username,
         password: password,
         role: body.role,
         personalInfo: body.personalInfo,
@@ -70,12 +78,14 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         url: body.url
     });
     const newAccount = yield account.save();
+    const profile = yield (0, profile_1.addProfile)(newAccount);
     const accountToken = new accountToken_1.default({
         accountID: account._id
     });
     const newAccountToken = yield accountToken.save();
     const response = {
         accountID: account._id,
+        role: account.role,
         username: account.username
     };
     return (0, response_1.successResponse)(res, response);

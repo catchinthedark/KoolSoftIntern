@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { AES } from 'crypto-js'
 import { message } from 'antd'
-import { fetchMe, SelectLoginError } from "./meSlice"
+import { fetchMe, fetchMyProfile, SelectLoginError } from "../features/me/meSlice"
+import fetchInterceptors from "../utils/fetchInterceptors"
 
 const LogInForm = () => {
     const [username, setUsername] = useState('')
@@ -15,27 +16,22 @@ const LogInForm = () => {
 
     const onLogInClicked = async () => {
         if (!username || !password) return
-        fetch(`${process.env.REACT_APP_BASE_URL}/auth/login`, {
+        const {success, data} = await fetchInterceptors({
             method: "POST",
-            body: JSON.stringify({
-              username,
-              password: AES.encrypt(password, process.env.REACT_APP_ENCRYPTED_KEY!).toString()
-            }),
-            headers: { "Content-Type": "application/json" },
-            credentials: 'include'
-          })
-            .then((res) => res.json())
-            .then((rspBody) => {
-              if (!rspBody.success) message.error(rspBody.data) 
-                else {
-                    dispatch(fetchMe())
-                    navigate('/')
-                }
-            })
-            .catch((e) => {
-              console.error((e));
-              message.error("Error");
-            })
+            url: `/auth/login`,
+            baseUrl: `${process.env.REACT_APP_BASE_URL}`,
+            body: {
+                username,
+                password: AES.encrypt(password, process.env.REACT_APP_ENCRYPTED_KEY!).toString()
+            }
+        })
+        if (success) {
+            dispatch(fetchMe(data.accountID))
+            dispatch(fetchMyProfile(data.accountID))
+            navigate('/')
+        } else {
+            message.error(data)
+        }
     }
 
     const onSignUpClicked = () => {
@@ -52,7 +48,6 @@ const LogInForm = () => {
                     id="username"
                     name="username"
                     value={username}
-                    placeholder="jin"
                     type="text"
                     required
                     onChange={(e) => setUsername(e.target.value)}

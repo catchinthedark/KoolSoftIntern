@@ -4,7 +4,6 @@ import mongoose from "mongoose"
 import cors from "cors"
 import cookieParser from 'cookie-parser'
 import accountRoutes from './routes/account'
-import cvRoutes from './routes/cv'
 import profileRoutes from './routes/profile'
 import authRoutes from './routes/auth'
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandling"
@@ -24,7 +23,6 @@ app.use(bodyParser.urlencoded({
 }))
 
 app.use('/account', accountRoutes)
-app.use('/cv', cvRoutes)
 app.use('/profile', profileRoutes)
 app.use('/auth', authRoutes)
 app.use(errorHandler)

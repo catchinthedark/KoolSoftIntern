@@ -3,7 +3,8 @@ import { model, Schema } from 'mongoose'
 import mongoose from 'mongoose'
 
 const PersonalInfoSchema: Schema = new Schema ({
-    name: String,
+    firstName: String,
+    lastName: String,
     gender: String,
     dob: String,
 })

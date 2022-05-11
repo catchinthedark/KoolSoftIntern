@@ -1,54 +1,76 @@
 import { Response, Request } from "express";
-import Profile from "../../types/profile";
-const profileModel = require("../../models/profile");
+import Profile, { CVNote, PastWork, WorkInfo } from "../../types/profile";
+import profileModel from "../../models/profile";
 import mongoose from "mongoose";
+import { AuthRequest } from "../../common/request";
+import { BadRequestError, ForbiddenError, ServerError, UnauthorizedError } from "../../common/error";
+import { failureResponse, successResponse } from "../../common/response";
+import Account from "../../types/account";
 
-export const getProfiles = async (req: Request, res: Response): Promise<void> => {
+export const getProfiles = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { accountID, role } = req.credentials!;
+    if (role != 'HR') throw new ForbiddenError({ error: "You don't have permission to do this."})
     const profiles: Profile[] = await profileModel.find()
-    res.status(200)
-       .json(profiles)
+    return successResponse(res, profiles)
 }
 
-export const getProfileByUsername = async (req: Request, res: Response): Promise<void> => {
-    const profile: Profile | null = await profileModel.findOne({ username: req.params.username })
-    res.status(200)
-       .json(profile)
+export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { accountID, role } = req.credentials!;
+    let thisAccountID = accountID
+    const _id = new mongoose.Types.ObjectId(req.params.id)
+    if (role === 'HR' && thisAccountID !== _id) thisAccountID = _id
+    const profile: Profile | null = await profileModel.findOne({accountID: thisAccountID})
+    if (!profile) return failureResponse(res, { data: -2 })
+    return successResponse(res, profile)
 }
 
-export const addProfile = async (req: Request, res: Response): Promise<void> => {
-    const body = req.body as Pick<Profile, "username" | "workInfo" | "workExperience" | "education">
+export const addProfile = async (account: Account): Promise<Profile> => {
+    let type
+    if (account.role === 'Applicant') type = 'CV'
+        else type = 'Profile'
+    const cvNote : CVNote = {
+        status: '',
+        note: ''
+    }
+    const workInfo : WorkInfo = {
+        department: '',
+        title: '',
+        salary: 0,
+        type: '',
+        hireDate: ''
+    }
     const profile : Profile = new profileModel({
-        username: body.username,
-        workInfo: body.workInfo,
-        workExperience: body.workExperience,
-        education: body.education
+        accountID: account._id,
+        type: type,
+        cvNote: cvNote,
+        workInfo: workInfo,
+        workExperience: [],
+        personalProjects: [],
+        achievements: [],
+        education: [],
     })    
     const newProfile : Profile = await profile.save()
-    const allProfiles: Profile[] = await profileModel.find()
-        
-    res.status(201)
-       .json({ message: "Profile added", profile: newProfile, profiles: allProfiles })
+   
+    return newProfile
 }
 
-export const updateProfile = async (req: Request, res: Response): Promise<void> => {
-    const { params: { id }, body } = req
-    const _Id = new mongoose.Types.ObjectId(id)
-    const updatedProfile : Profile | null = await profileModel.findByIdAndUpdate(
-        { _id: _Id },
-        body
-    )
+export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+    const body = req.body as Profile
+    const updatedProfile : Profile | null = await profileModel.findOneAndUpdate({ _id: body._id }, {$set: { type: body.type, cvNote: body.cvNote, workInfo: body.workInfo, workExperience: body.workExperience, personalProjects: body.personalProjects, achievements: body.achievements, education: body.education }} )
+    if (!updateProfile) throw new BadRequestError({message: 'Profile not found!'})
+    const profile : Profile | null = await profileModel.findById({ _id: body._id })
     const allProfiles: Profile[] = await profileModel.find()
-
-    res.status(200)
-       .json({ message: "Profile updated", profile: updatedProfile, profiles: allProfiles })
+    
+    return successResponse(res, { profile: profile, profiles: allProfiles })
 }
 
-export const deleteProfile = async (req: Request, res: Response): Promise<void> => {
+export const deleteProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { accountID, role } = req.credentials!;
+    if (role != 'HR') throw new ForbiddenError({ error: "You don't have permission to do this."})
     const _Id = new mongoose.Types.ObjectId(req.params.id)
     const deletedProfile : Profile | null = await profileModel.findByIdAndDelete(_Id)
-    const allProfiles: Profile[] = await profileModel.find()
-
-    res.status(200)
-       .json({ message: "Profile deleted", profile: deletedProfile, profiles: allProfiles })
+    const allProfiles : Profile[] = await profileModel.find()
+    if (!deletedProfile) return failureResponse(res, {data: -2})
+    return successResponse(res, { profile: deletedProfile, profiles: allProfiles })
 }
 

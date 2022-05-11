@@ -37,23 +37,36 @@
     padding: 0 4rem;
   }
 
-  /* CARD */
-  .card {
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-    transition: 0.3s;
-    height: 400px;
-    width: 300px;
-    display: flex;
-  }
+/* TABLE */
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
 
-  .card:hover {
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-  }
+.td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
 
-  /* LIST */
-  .list {
-    display: grid;
-    grid-template-columns: auto auto;
-    align-items: center;
-    justify-content: space-around;
-  }
+.element {
+  margin: 0 4rem;
+}
+
+.account-background {
+  width: 98%;
+  height: 98%;
+  background-color: darkolivegreen;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.account-container {
+  width: 93%;
+  height: 93%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+}

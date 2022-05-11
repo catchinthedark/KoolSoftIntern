@@ -53,6 +53,7 @@ const verifyCredentials = (args) => {
     try {
         const { token, type = 'accessToken' } = args;
         const secret = type === 'accessToken' ? process.env.ACCESS_TOKEN_SECRET : process.env.REFRESH_TOKEN_SECRET;
+        const a = jsonwebtoken_1.default.verify(token, secret);
         const credentials = jsonwebtoken_1.default.verify(token, secret);
         return credentials;
     }

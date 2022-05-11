@@ -1,9 +1,9 @@
-import { Request } from "express";
-import { ObjectId } from 'mongoose'
+import { Request } from "express"
+import mongoose from "mongoose";
 
 export type Credentials = {
-  accountID: ObjectId;
-  username: string;
+  accountID: mongoose.Types.ObjectId;
+  role: string;
 }
 
 export interface AuthRequest extends Request {

@@ -5,12 +5,13 @@ import mongoose from 'mongoose'
 const WorkInfoSchema: Schema = new Schema ({
     department: String,
     title: String,
-    salary: Number,
-    type: String,
-    hireDate: String
+    salary: Number, //only profile
+    type: String, //only profile
+    hireDate: String //only profile
 })
 
 export const PastWorkSchema: Schema = new Schema ({
+    no: Number,
     company: String,
     jobTitle: String,
     from: String,
@@ -19,21 +20,31 @@ export const PastWorkSchema: Schema = new Schema ({
 })
 
 export const PastDegreeSchema: Schema = new Schema ({
+    no: Number,
     school: String,
     degree: String,
     fieldOfStudy: String,
-    yearOfCompletion: Number,
+    yearOfCompletion: String,
     description: String
 })
 
+export const CVNoteSchema: Schema = new Schema ({
+    status: String, //passed - eliminated - considering
+    note: String,
+})
+
 const ProfileSchema: Schema = new Schema ({
-    username: {
-        type: String,
+    accountID: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: "account"
     },
+    type: String, //CV-profile
+    cvNote: CVNoteSchema, //only CV
     workInfo: WorkInfoSchema,
     workExperience: [PastWorkSchema],
-    education: [PastDegreeSchema]
+    personalProjects: [PastWorkSchema],
+    achievements: [PastDegreeSchema],
+    education: [PastDegreeSchema],
 })
 
 export default model<Profile>("profile", ProfileSchema)

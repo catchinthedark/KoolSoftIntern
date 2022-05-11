@@ -13,6 +13,7 @@ const fetchInterceptors = async (args: { method?: string; url: string; baseUrl: 
     const rspBody = await response.json();
   
     if (status === 401 && rspBody?.data === -1) {
+      console.log("refresh token...")
       await fetch(`${baseUrl}/auth/refresh-token`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },

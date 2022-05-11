@@ -9,7 +9,6 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const account_1 = __importDefault(require("./routes/account"));
-const cv_1 = __importDefault(require("./routes/cv"));
 const profile_1 = __importDefault(require("./routes/profile"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const errorHandling_1 = require("./middlewares/errorHandling");
@@ -25,7 +24,6 @@ app.use(body_parser_1.default.urlencoded({
     extended: true
 }));
 app.use('/account', account_1.default);
-app.use('/cv', cv_1.default);
 app.use('/profile', profile_1.default);
 app.use('/auth', auth_1.default);
 app.use(errorHandling_1.errorHandler);

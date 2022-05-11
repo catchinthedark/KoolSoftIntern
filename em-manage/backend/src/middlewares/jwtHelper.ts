@@ -23,6 +23,7 @@ export const verifyCredentials = (args: {
   try {
     const { token, type = 'accessToken' } = args;
     const secret = type === 'accessToken' ? process.env.ACCESS_TOKEN_SECRET : process.env.REFRESH_TOKEN_SECRET;
+    const a = jwt.verify(token, secret!)
     const credentials = jwt.verify(token, secret!) as Credentials;
     return credentials;
   } catch (e) {

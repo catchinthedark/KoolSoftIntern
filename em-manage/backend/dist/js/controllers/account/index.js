@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAccount = exports.updateAccount = exports.getMe = exports.getAccounts = void 0;
+exports.deleteAccount = exports.updateAccount = exports.getAccount = exports.getAccounts = void 0;
 const account_1 = __importDefault(require("../../models/account"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const error_1 = require("../../common/error");
@@ -22,30 +22,37 @@ const getAccounts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     return (0, response_1.successResponse)(res, accounts);
 });
 exports.getAccounts = getAccounts;
-const getMe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { accountID, username } = req.credentials;
-    const account = yield account_1.default.findOne({ username: username });
+const getAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { accountID, role } = req.credentials;
+    let thisAccountID = accountID;
+    const _id = new mongoose_1.default.Types.ObjectId(req.params.id);
+    if (role === 'HR' && thisAccountID !== _id)
+        thisAccountID = _id;
+    const account = yield account_1.default.findById(thisAccountID);
     if (!account)
         throw new error_1.ServerError({ data: -1 });
     return (0, response_1.successResponse)(res, account);
 });
-exports.getMe = getMe;
+exports.getAccount = getAccount;
 const updateAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { params: { id }, body } = req;
-    const _Id = new mongoose_1.default.Types.ObjectId(id);
-    const updatedAccount = yield account_1.default.findByIdAndUpdate({ _id: _Id }, body);
+    const body = req.body;
+    const updatedAccount = yield account_1.default.findOneAndUpdate({ _id: body._id }, { $set: { role: body.role, personalInfo: body.personalInfo, contactInfo: body.contactInfo, url: body.url } });
     if (!updatedAccount)
         throw new error_1.BadRequestError({ message: 'Account not found!' });
+    const account = yield account_1.default.findById({ _id: body._id });
     const allAccounts = yield account_1.default.find();
-    res.status(200)
-        .json({ message: "Account updated", account: updatedAccount, accounts: allAccounts });
+    return (0, response_1.successResponse)(res, { account: account, accounts: allAccounts });
 });
 exports.updateAccount = updateAccount;
 const deleteAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { accountID, role } = req.credentials;
+    if (role != 'HR')
+        throw new error_1.ForbiddenError({ error: "You don't have permission to do this." });
     const _Id = new mongoose_1.default.Types.ObjectId(req.params.id);
     const deletedAccount = yield account_1.default.findByIdAndDelete(_Id);
     const allAccounts = yield account_1.default.find();
-    res.status(200)
-        .json({ message: "Account deleted", account: deletedAccount, accounts: allAccounts });
+    if (!deletedAccount)
+        return (0, response_1.failureResponse)(res, { data: -2 });
+    return (0, response_1.successResponse)(res, { account: deletedAccount, accounts: allAccounts });
 });
 exports.deleteAccount = deleteAccount;

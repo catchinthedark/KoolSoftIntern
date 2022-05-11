@@ -1,15 +1,20 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PastDegreeSchema = exports.PastWorkSchema = void 0;
+exports.CVNoteSchema = exports.PastDegreeSchema = exports.PastWorkSchema = void 0;
 const mongoose_1 = require("mongoose");
+const mongoose_2 = __importDefault(require("mongoose"));
 const WorkInfoSchema = new mongoose_1.Schema({
     department: String,
     title: String,
     salary: Number,
     type: String,
-    hireDate: String
+    hireDate: String //only profile
 });
 exports.PastWorkSchema = new mongoose_1.Schema({
+    no: Number,
     company: String,
     jobTitle: String,
     from: String,
@@ -17,19 +22,28 @@ exports.PastWorkSchema = new mongoose_1.Schema({
     description: String
 });
 exports.PastDegreeSchema = new mongoose_1.Schema({
+    no: Number,
     school: String,
     degree: String,
     fieldOfStudy: String,
-    yearOfCompletion: Number,
+    yearOfCompletion: String,
     description: String
 });
+exports.CVNoteSchema = new mongoose_1.Schema({
+    status: String,
+    note: String,
+});
 const ProfileSchema = new mongoose_1.Schema({
-    username: {
-        type: String,
+    accountID: {
+        type: mongoose_2.default.Schema.Types.ObjectId,
         ref: "account"
     },
+    type: String,
+    cvNote: exports.CVNoteSchema,
     workInfo: WorkInfoSchema,
     workExperience: [exports.PastWorkSchema],
-    education: [exports.PastDegreeSchema]
+    personalProjects: [exports.PastWorkSchema],
+    achievements: [exports.PastDegreeSchema],
+    education: [exports.PastDegreeSchema],
 });
 exports.default = (0, mongoose_1.model)("profile", ProfileSchema);

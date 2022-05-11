@@ -1,15 +1,11 @@
 import { Link } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { accountDefault, fetchMe, SelectLoginStatus, SelectMe } from "../features/me/meSlice"
+import Cookies from "js-cookie"
 
 const HomePage = () => {
-    const dispatch = useDispatch()
-
     const isLogin = useSelector(SelectLoginStatus)
     const me = useSelector(SelectMe)
-    if (isLogin && me === accountDefault) {
-        dispatch(fetchMe())
-    }
 
     return (
       <div>
@@ -24,7 +20,7 @@ const HomePage = () => {
             </div>
             :
             <div>
-                Welcome to KoolSoft page {me.personalInfo.name}!
+                Welcome to KoolSoft page {me.personalInfo.firstName}!
             </div>
         }  
       </div>

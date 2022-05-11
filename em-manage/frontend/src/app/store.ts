@@ -5,6 +5,7 @@ import storage from 'redux-persist/lib/storage';
 
 import accountsSlice from '../features/account/accountsSlice';
 import meSlice from '../features/me/meSlice';
+import profilesSlice from '../features/profile/profilesSlice';
 
 const persistConfig = {
   key: 'primary',
@@ -13,7 +14,8 @@ const persistConfig = {
 
 const reducers = combineReducers({
   accounts: accountsSlice,
-  me: meSlice
+  me: meSlice,
+  profiles: profilesSlice
 })
 
 const persistedReducer = persistReducer(persistConfig, reducers)

@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { getProfiles, getProfileByUsername, addProfile, updateProfile, deleteProfile } from "../../controllers/profile";
+import { getProfiles, getProfile, updateProfile, deleteProfile } from "../../controllers/profile";
 import { asyncHandler } from "../../middlewares/errorHandling";
+import { verifyTokenMiddleware } from "../../middlewares/jwtHelper";
 
 const router: Router = Router()
 
-router.get('/all', asyncHandler(getProfiles))
-router.get('/:username', asyncHandler(getProfileByUsername))
-router.post('/add', asyncHandler(addProfile))
-router.put('/update/:id', asyncHandler(updateProfile))
-router.delete('/delete/:id', asyncHandler(deleteProfile))
+router.get('/all', verifyTokenMiddleware, asyncHandler(getProfiles))
+router.get('/:id', verifyTokenMiddleware, asyncHandler(getProfile))
+router.put('/update', verifyTokenMiddleware, asyncHandler(updateProfile))
+router.delete('/delete/:id', verifyTokenMiddleware, asyncHandler(deleteProfile))
 
 export default router

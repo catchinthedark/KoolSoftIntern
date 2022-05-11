@@ -3,25 +3,26 @@ import { RootState } from "../../app/store"
 import fetchInterceptors from "../../utils/fetchInterceptors"
 
 export type PersonalInfo = {
-    name: String,
-    gender: String,
-    dob: String,
+    firstName: string,
+    lastName: string,
+    gender: string,
+    dob: string,
 }
 
 export type ContactInfo = {
-    email: String,
-    phone: String,
-    address: String,
+    email: string,
+    phone: string,
+    address: string,
 }
 
-export interface Account {
-    _id: String,
-    username: String,
-    password: String,
-    role: String,
+export type Account = {
+    _id: string,
+    username: string,
+    password: string,
+    role: string,
     personalInfo: PersonalInfo,
     contactInfo: ContactInfo,
-    url: String
+    url: string
 }
 
 const initialState = {
@@ -38,6 +39,21 @@ const accountsSlice = createSlice({
     name: 'accounts',
     initialState,
     reducers: {
+        updateAccounts(state, action) {
+            console.log('start updating accounts...') 
+            return {
+                ...state,
+                accounts: action.payload
+            }
+        },
+        resetAccounts(state, action) {
+            return {
+                ...state,
+                accounts: new Array<Account>(),
+                status: 'idle',
+                error: ''
+            }
+        }
     },
     extraReducers(builder: any) {
         builder
@@ -64,13 +80,15 @@ const accountsSlice = createSlice({
     }
 })
 
-export const fetchAllAccounts = createAsyncThunk('fetch-all', async () => {
+export const fetchAllAccounts = createAsyncThunk('fetch-all-accounts', async () => {
+    console.log("fetch all accounts...")
     const { success, data } = await fetchInterceptors({
-        url: "/account/",
+        url: "/account/all",
         baseUrl: `${process.env.REACT_APP_BASE_URL}`
       });
     if (success) return data;
     return null;
 })
 
+export const { updateAccounts, resetAccounts } = accountsSlice.actions
 export default accountsSlice.reducer
