@@ -58,7 +58,6 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.logout = logout;
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
-    console.log(body);
     const foundAccount = yield account_1.default.findOne({ "personalInfo.firstName": body.personalInfo.firstName, "personalInfo.lastName": body.personalInfo.lastName, "contactInfo.email": body.contactInfo.email });
     if (foundAccount)
         throw new error_1.ServerError({ data: -2 });

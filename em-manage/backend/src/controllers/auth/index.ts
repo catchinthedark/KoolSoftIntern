@@ -52,7 +52,6 @@ export const logout = async (req: AuthRequest, res: Response): Promise<void> => 
 
 export const register = async (req: Request, res: Response): Promise<void> => {
     const body = req.body as Pick<Account, "password" | "role" | "personalInfo" | "contactInfo" | "url">
-    console.log(body)
     const foundAccount : Account | null = await accountModel.findOne({ "personalInfo.firstName": body.personalInfo.firstName, "personalInfo.lastName": body.personalInfo.lastName, "contactInfo.email": body.contactInfo.email })
     if (foundAccount) throw new ServerError({ data: -2 })
 

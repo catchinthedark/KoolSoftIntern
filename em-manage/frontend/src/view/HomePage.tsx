@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom"
-import { useDispatch, useSelector } from "react-redux"
-import { accountDefault, fetchMe, SelectLoginStatus, SelectMe } from "../features/me/meSlice"
-import Cookies from "js-cookie"
+import { useSelector } from "react-redux"
+import {SelectLoginStatus, SelectMe } from "../features/me/meSlice"
 
 const HomePage = () => {
     const isLogin = useSelector(SelectLoginStatus)

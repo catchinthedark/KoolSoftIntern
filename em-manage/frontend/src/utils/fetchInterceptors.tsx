@@ -1,4 +1,17 @@
-import Cookies from "js-cookie";
+const refreshToken = (baseUrl : string) => {
+  return new Promise(resolve => {
+    setTimeout(async() => {
+      await fetch(`${baseUrl}/auth/refresh-token`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include'
+      });
+      resolve("refresh token");
+    }, 3000);
+  });
+}
+
+let refreshTokenRequest : any = null
 
 const fetchInterceptors = async (args: { method?: string; url: string; baseUrl: string; body?: any }): Promise<{
     success: boolean;
@@ -12,15 +25,13 @@ const fetchInterceptors = async (args: { method?: string; url: string; baseUrl: 
     const status = response.status;
     const rspBody = await response.json();
   
+    
     if (status === 401 && rspBody?.data === -1) {
       console.log("refresh token...")
-      await fetch(`${baseUrl}/auth/refresh-token`, {
-        method: 'POST',
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include'
-      });
+      refreshTokenRequest = refreshTokenRequest ? refreshTokenRequest : refreshToken(baseUrl)
       const newResp = await fetch(`${baseUrl}${url}`, config);
       const newRspBody = await newResp.json();
+      refreshTokenRequest = null
       return newRspBody;
     }
   return rspBody;

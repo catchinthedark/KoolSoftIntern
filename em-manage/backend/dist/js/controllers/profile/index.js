@@ -66,13 +66,14 @@ const addProfile = (account) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.addProfile = addProfile;
 const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { accountID, role } = req.credentials;
     const body = req.body;
     const updatedProfile = yield profile_1.default.findOneAndUpdate({ _id: body._id }, { $set: { type: body.type, cvNote: body.cvNote, workInfo: body.workInfo, workExperience: body.workExperience, personalProjects: body.personalProjects, achievements: body.achievements, education: body.education } });
-    if (!exports.updateProfile)
+    if (!updatedProfile)
         throw new error_1.BadRequestError({ message: 'Profile not found!' });
-    const profile = yield profile_1.default.findById({ _id: body._id });
+    const myProfile = yield profile_1.default.findById({ _id: accountID });
     const allProfiles = yield profile_1.default.find();
-    return (0, response_1.successResponse)(res, { profile: profile, profiles: allProfiles });
+    return (0, response_1.successResponse)(res, { profile: myProfile, profiles: allProfiles });
 });
 exports.updateProfile = updateProfile;
 const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

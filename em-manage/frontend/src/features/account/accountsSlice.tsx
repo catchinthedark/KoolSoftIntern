@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { RootState } from "../../app/store"
 import fetchInterceptors from "../../utils/fetchInterceptors"
+import { logout } from "../me/meSlice"
 
 export type PersonalInfo = {
     firstName: string,
@@ -38,41 +39,73 @@ export const SelectAccountsStatus = (state: RootState) => state.accounts.status
 const accountsSlice = createSlice({
     name: 'accounts',
     initialState,
-    reducers: {
-        updateAccounts(state, action) {
-            console.log('start updating accounts...') 
-            return {
-                ...state,
-                accounts: action.payload
-            }
-        },
-        resetAccounts(state, action) {
-            return {
-                ...state,
-                accounts: new Array<Account>(),
-                status: 'idle',
-                error: ''
-            }
-        }
-    },
+    reducers: {},
     extraReducers(builder: any) {
         builder
         .addCase(fetchAllAccounts.pending, (state: RootState, action: any) => {
             return {
-                state,
+                ...state,
                 status: "pending"
             }
         })
         .addCase(fetchAllAccounts.fulfilled, (state: RootState, action: any) => {
             return {
-                state,
+                ...state,
                 status: "fulfilled",
                 accounts: action.payload
             }
         })
         .addCase(fetchAllAccounts.rejected, (state: RootState, action: any) => {
             return {
-                state,
+                ...state,
+                status: "rejected",
+                error: action.error.message
+            }
+        })
+        .addCase(logout.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                accounts: new Array<Account>(),
+                status: "idle",
+                error: ''
+            }
+        })
+        .addCase(editAccount.pending, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "pending"
+            }
+        })
+        .addCase(editAccount.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "fullfilled",
+                accounts: action.payload.accounts
+            }
+        })
+        .addCase(editAccount.rejected, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "rejected",
+                error: action.error.message
+            }
+        })
+        .addCase(removeAccount.pending, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "pending"
+            }
+        })
+        .addCase(removeAccount.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "fulfilled",
+                accounts: action.payload.accounts
+            }
+        })
+        .addCase(removeAccount.rejected, (state: RootState, action: any) => {
+            return {
+                ...state,
                 status: "rejected",
                 error: action.error.message
             }
@@ -80,8 +113,7 @@ const accountsSlice = createSlice({
     }
 })
 
-export const fetchAllAccounts = createAsyncThunk('fetch-all-accounts', async () => {
-    console.log("fetch all accounts...")
+export const fetchAllAccounts = createAsyncThunk('fetch-all-accounts', async() => {
     const { success, data } = await fetchInterceptors({
         url: "/account/all",
         baseUrl: `${process.env.REACT_APP_BASE_URL}`
@@ -90,5 +122,26 @@ export const fetchAllAccounts = createAsyncThunk('fetch-all-accounts', async () 
     return null;
 })
 
-export const { updateAccounts, resetAccounts } = accountsSlice.actions
+export const editAccount = createAsyncThunk('edit-account', async(updatedUser: Account) => {
+    const { success, data } = await fetchInterceptors({
+        method: "PUT",
+        url: `/account/update`,
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`,
+        body: updatedUser
+    })
+    return data
+})
+
+export const removeAccount = createAsyncThunk('remove-account', async(accountID: string) => {
+    const { success, data } = await fetchInterceptors({
+        method: 'DELETE',
+        url: `/account/delete`,
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`,
+        body: {
+            _id: accountID
+        }
+    })
+    return data
+})
+
 export default accountsSlice.reducer

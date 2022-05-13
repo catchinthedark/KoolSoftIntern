@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { RootState } from "../../app/store"
-import { Account } from "../account/accountsSlice"
+import { Account, editAccount } from "../account/accountsSlice"
 import fetchInterceptors from "../../utils/fetchInterceptors"
-import { Profile } from "../profile/profilesSlice"
+import { editProfile, Profile } from "../profile/profilesSlice"
 
 export const accountDefault: Account = {
     _id: '',
@@ -37,32 +37,7 @@ const initialState = {
 const meSlice = createSlice({
     name: 'me',
     initialState,
-    reducers: {
-        updateMe(state, action) {
-            console.log('updating me...')
-            return {
-                ...state,
-                me: action.payload
-            }
-        },
-        updateMyProfile(state, action) {
-            console.log('updating my profile...')
-            return {
-                ...state,
-                myProfile: action.payload
-            }
-        },
-        logout(state, action) {
-            console.log('logging out...')
-            return {
-                ...state,
-                me: accountDefault,
-                myProfile: profileDefault,
-                login: false,
-                error: ''
-            }
-        }
-    },
+    reducers: {},
     extraReducers(builder: any) {
         builder
         .addCase(fetchMe.pending, (state: RootState, action: any) => {
@@ -106,6 +81,41 @@ const meSlice = createSlice({
                 error: action.error.message
             }
         })
+        .addCase(logout.pending, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "pending"
+            }
+        })
+        .addCase(logout.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                me: accountDefault,
+                myProfile: profileDefault,
+                login: false,
+                status: 'idle',
+                error: ''
+            }
+        })
+        .addCase(logout.rejected, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "rejected",
+                error: action.error.message
+            }
+        })
+        .addCase(editAccount.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                me: action.payload.account
+            }
+        })
+        .addCase(editProfile.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                myProfile: action.payload.profile
+            }
+        })
     }
 })
 
@@ -140,5 +150,12 @@ export const fetchMyProfile = createAsyncThunk('fetch-profile', async(accountID:
     return data
 })
 
-export const { updateMe, updateMyProfile, logout } = meSlice.actions
+export const logout = createAsyncThunk('logout', async() => {
+    const { success, data } = await fetchInterceptors({
+        url: `/auth/logout`,
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`
+    })
+    return data
+})
+
 export default meSlice.reducer

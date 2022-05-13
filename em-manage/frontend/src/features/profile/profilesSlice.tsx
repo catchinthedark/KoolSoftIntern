@@ -1,7 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { RootState } from "../../app/store"
 import fetchInterceptors from "../../utils/fetchInterceptors"
-import { Account } from "../account/accountsSlice"
+import { Account, removeAccount } from "../account/accountsSlice"
+import { logout } from "../me/meSlice"
 
 export type WorkInfo = {
     department: string,
@@ -55,23 +56,7 @@ const initialState = {
 const profilesSlice = createSlice({
     name: 'profile',
     initialState,
-    reducers: {
-        updateProfiles(state, action) {
-            console.log('start updating all profiles...')
-            return {
-                ...state,
-                profiles: action.payload
-            }
-        },
-        resetProfiles(state, action) {
-            return {
-                ...state,
-                profiles: new Array<Profile>(),
-                status: 'idle',
-                error: ''
-            }
-        }
-    },
+    reducers: {},
     extraReducers(builder: any) {
         builder
         .addCase(fetchProfiles.pending, (state: RootState, action: any) => {
@@ -94,10 +79,45 @@ const profilesSlice = createSlice({
                 error: action.error.message
             }
         })
+        .addCase(logout.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                profiles: new Array<Profile>(),
+                status: "idle",
+                error: ''
+            }
+        })
+        .addCase(editProfile.pending, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "pending"
+            }
+        })
+        .addCase(editProfile.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "fullfilled",
+                profiles: action.payload.profiles
+            }
+        })
+        .addCase(editProfile.rejected, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "rejected",
+                error: action.error.message
+            }
+        })
+        .addCase(removeAccount.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "fulfilled",
+                profiles: action.payload.profiles
+            }
+        })
     }
 })
 
-export const fetchProfiles = createAsyncThunk('fetch-all-profiles', async () => {
+export const fetchProfiles = createAsyncThunk('fetch-all-profiles', async() => {
     const { success, data } = await fetchInterceptors({
         url: "/profile/all",
         baseUrl: `${process.env.REACT_APP_BASE_URL}`
@@ -106,10 +126,19 @@ export const fetchProfiles = createAsyncThunk('fetch-all-profiles', async () => 
     return null;
 })
 
+export const editProfile = createAsyncThunk('edit-profile', async(updatedProfile: Profile) => {
+    const { success, data } = await fetchInterceptors({
+        method: "PUT",
+        url: `/profile/update`,
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`,
+        body: updatedProfile
+    })
+    return data
+})
+
 export const SelectAllProfiles = (state: RootState) => state.profiles.profiles
 export const SelectProfileByAccount = (account: Account, state: RootState) => {
     return state.profiles.profiles.find(profile => profile.accountID === account._id)
 }
 
-export const { updateProfiles, resetProfiles } = profilesSlice.actions
 export default profilesSlice.reducer

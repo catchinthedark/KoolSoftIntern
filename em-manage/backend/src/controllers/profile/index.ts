@@ -53,13 +53,14 @@ export const addProfile = async (account: Account): Promise<Profile> => {
 }
 
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { accountID, role } = req.credentials!
     const body = req.body as Profile
     const updatedProfile : Profile | null = await profileModel.findOneAndUpdate({ _id: body._id }, {$set: { type: body.type, cvNote: body.cvNote, workInfo: body.workInfo, workExperience: body.workExperience, personalProjects: body.personalProjects, achievements: body.achievements, education: body.education }} )
-    if (!updateProfile) throw new BadRequestError({message: 'Profile not found!'})
-    const profile : Profile | null = await profileModel.findById({ _id: body._id })
+    if (!updatedProfile) throw new BadRequestError({message: 'Profile not found!'})
+    const myProfile : Profile | null = await profileModel.findById({ _id: accountID })
     const allProfiles: Profile[] = await profileModel.find()
     
-    return successResponse(res, { profile: profile, profiles: allProfiles })
+    return successResponse(res, { profile: myProfile, profiles: allProfiles })
 }
 
 export const deleteProfile = async (req: AuthRequest, res: Response): Promise<void> => {

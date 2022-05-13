@@ -3,7 +3,6 @@ import Account from "../../types/account";
 import accountModel from "../../models/account";
 import profileModel from "../../models/profile";
 import accountTokenModel from "../../models/accountToken";
-import mongoose from "mongoose";
 import { BadRequestError, ForbiddenError, ServerError } from "../../common/error";
 import { AuthRequest } from "../../common/request";
 import { successResponse, failureResponse } from "../../common/response";
@@ -23,14 +22,15 @@ export const getAccount = async (req: AuthRequest, res: Response): Promise<void>
     return successResponse(res, account);
 }
 
-export const updateAccount = async (req: Request, res: Response): Promise<void> => {
+export const updateAccount = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { accountID, role } = req.credentials!
     const body = req.body as Account
     const updatedAccount : Account | null = await accountModel.findOneAndUpdate({ _id: body._id }, {$set: { role: body.role, personalInfo: body.personalInfo, contactInfo: body.contactInfo, url: body.url }} )
     if (!updatedAccount) throw new BadRequestError({message: 'Account not found!'})
-    const account: Account | null = await accountModel.findById({ _id: body._id })
+    let myAccount: Account | null = await accountModel.findById({ _id: accountID })
     const allAccounts: Account[] = await accountModel.find()
 
-    return successResponse(res, { account: account, accounts: allAccounts })
+    return successResponse(res, { account: myAccount, accounts: allAccounts })
 }
 
 export const deleteAccount = async (req: AuthRequest, res: Response): Promise<void> => {

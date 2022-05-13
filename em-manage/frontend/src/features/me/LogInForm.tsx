@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { AES } from 'crypto-js'
 import { message } from 'antd'
-import { fetchMe, fetchMyProfile, SelectLoginError } from "../features/me/meSlice"
-import fetchInterceptors from "../utils/fetchInterceptors"
+import { fetchMe, fetchMyProfile, SelectLoginError } from "./meSlice"
+import fetchInterceptors from "../../utils/fetchInterceptors"
 
 const LogInForm = () => {
     const [username, setUsername] = useState('')

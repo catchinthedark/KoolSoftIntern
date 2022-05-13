@@ -1,11 +1,10 @@
-import { message } from "antd"
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { Account, ContactInfo, PersonalInfo, resetAccounts, updateAccounts } from "../features/account/accountsSlice"
-import { Profile, PastWork, updateProfiles, CVNote, WorkInfo, PastDegree, resetProfiles } from "../features/profile/profilesSlice"
-import { logout, SelectMe, updateMe, updateMyProfile } from "../features/me/meSlice"
-import fetchInterceptors from '../utils/fetchInterceptors'
+import { RootState } from "../../app/store"
+import { Account, ContactInfo, editAccount, PersonalInfo } from "../account/accountsSlice"
+import { Profile, PastWork, CVNote, WorkInfo, PastDegree, editProfile, SelectProfileByAccount } from "../profile/profilesSlice"
+import { logout, SelectMe } from "./meSlice"
 
 const UpdateInfo = <T, X, >(info: T, updatedField: string, value: X) : T => {
     const updatedInfo : T = {...info, [updatedField] : value}
@@ -26,12 +25,13 @@ const checkSelected = <T, >(checkVal: T, baseVal: T) : boolean => {
     return false
 }
 
-const UserPage = ({ user, profile, setOpenFlag } : { user : Account, profile: Profile, setOpenFlag: any }) => {
+const UserPage = ({ user, setOpenFlag } : { user : Account, setOpenFlag: any }) => {
     useDispatch()
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
     const me = useSelector(SelectMe)
+    const profile = useSelector((state: RootState) => SelectProfileByAccount(user, state))
     
     const [updatedUser, setUpdatedUser] = useState<Account>(user)
     const [updatedProfile, setUpdatedProfile] = useState<Profile>(profile!)
@@ -50,53 +50,19 @@ const UserPage = ({ user, profile, setOpenFlag } : { user : Account, profile: Pr
     const [salaryFlag, setSalaryFlag] = useState<boolean>(true)
     const [typeFlag, setTypeFlag] = useState<boolean>(true)
 
-    const onLogOutClicked = async () => {
-        const {success, data} = await fetchInterceptors({
-            url: `/auth/logout`,
-            baseUrl: `${process.env.REACT_APP_BASE_URL}`
-        })
-        if (success) {
-            if (me.role === 'HR') {
-                dispatch(resetAccounts({me}))
-                dispatch(resetProfiles({me}))
-            }
-            dispatch(logout({me}))
-            navigate('/')
-        } else {
-            message.error(data)
-        }
+    const onLogOutClicked = async() => {
+        dispatch(logout())
+        navigate("/")
     }
 
     const onSaveEditAccountClicked = async() => {
-        const {success, data} = await fetchInterceptors({
-            method: "PUT",
-            url: `/account/update`,
-            baseUrl: `${process.env.REACT_APP_BASE_URL}`,
-            body: updatedUser
-        })
-        if (success) {
-            if (user === me) dispatch(updateMe(data.account))
-            dispatch(updateAccounts(data.accounts))
-            navigate('/')
-        } else {
-            message.error(data)
-        }
+        dispatch(editAccount(updatedUser))
+        navigate("/")
     }
 
     const onSaveEditProfileClicked = async() => {
-        const {success, data} = await fetchInterceptors({
-            method: "PUT",
-            url: `/profile/update`,
-            baseUrl: `${process.env.REACT_APP_BASE_URL}`,
-            body: updatedProfile
-        })
-        if (success) {
-            if (user === me) dispatch(updateMyProfile(data.profile))
-            dispatch(updateProfiles(data.profiles))
-            navigate('/')
-        } else {
-            message.error(data)
-        }
+        dispatch(editProfile(updatedProfile))
+        navigate("/")
     }
 
     const onAddWorkClicked = ( prop: string ) => {
