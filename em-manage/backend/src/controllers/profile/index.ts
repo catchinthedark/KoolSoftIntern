@@ -55,12 +55,10 @@ export const addProfile = async (account: Account): Promise<Profile> => {
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
     const { accountID, role } = req.credentials!
     const body = req.body as Profile
-    const updatedProfile : Profile | null = await profileModel.findOneAndUpdate({ _id: body._id }, {$set: { type: body.type, cvNote: body.cvNote, workInfo: body.workInfo, workExperience: body.workExperience, personalProjects: body.personalProjects, achievements: body.achievements, education: body.education }} )
-    if (!updatedProfile) throw new BadRequestError({message: 'Profile not found!'})
-    const myProfile : Profile | null = await profileModel.findById({ _id: accountID })
-    const allProfiles: Profile[] = await profileModel.find()
-    
-    return successResponse(res, { profile: myProfile, profiles: allProfiles })
+    if (accountID !== body._id && role !== "HR") throw new UnauthorizedError({message: "You don't have permission to update this"})
+    const updatedProfile : Profile | null = await profileModel.findOneAndUpdate({ _id: body._id }, {$set: { type: body.type, cvNote: body.cvNote, workInfo: body.workInfo, workExperience: body.workExperience, personalProjects: body.personalProjects, achievements: body.achievements, education: body.education }}, { new: true})
+    if (!updatedProfile) throw new BadRequestError({message: "cannot find profile"})
+    return successResponse(res, {profile: updatedProfile})
 }
 
 export const deleteProfile = async (req: AuthRequest, res: Response): Promise<void> => {

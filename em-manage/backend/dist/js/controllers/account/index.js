@@ -35,12 +35,12 @@ exports.getAccount = getAccount;
 const updateAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { accountID, role } = req.credentials;
     const body = req.body;
-    const updatedAccount = yield account_1.default.findOneAndUpdate({ _id: body._id }, { $set: { role: body.role, personalInfo: body.personalInfo, contactInfo: body.contactInfo, url: body.url } });
+    if (accountID !== body._id && role !== "HR")
+        throw new error_1.UnauthorizedError({ message: "You don't have permission to update this" });
+    const updatedAccount = yield account_1.default.findOneAndUpdate({ _id: body._id }, { $set: { role: body.role, personalInfo: body.personalInfo, contactInfo: body.contactInfo, url: body.url } }, { new: true });
     if (!updatedAccount)
-        throw new error_1.BadRequestError({ message: 'Account not found!' });
-    let myAccount = yield account_1.default.findById({ _id: accountID });
-    const allAccounts = yield account_1.default.find();
-    return (0, response_1.successResponse)(res, { account: myAccount, accounts: allAccounts });
+        throw new error_1.BadRequestError({ message: "cannot find account" });
+    return (0, response_1.successResponse)(res, { account: updatedAccount });
 });
 exports.updateAccount = updateAccount;
 const deleteAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

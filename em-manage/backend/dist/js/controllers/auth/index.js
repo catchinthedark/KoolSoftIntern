@@ -14,12 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRefreshToken = exports.getAccessToken = exports.refreshToken = exports.register = exports.logout = exports.login = void 0;
 const account_1 = __importDefault(require("../../models/account"));
+const profile_1 = __importDefault(require("../../models/profile"));
 const accountToken_1 = __importDefault(require("../../models/accountToken"));
 const error_1 = require("../../common/error");
 const auth_1 = require("../../middlewares/auth");
 const response_1 = require("../../common/response");
 const jwtHelper_1 = require("../../middlewares/jwtHelper");
-const profile_1 = require("../profile");
+const profile_2 = require("../profile");
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     const account = yield account_1.default.findOne({ username: body.username });
@@ -28,12 +29,13 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, auth_1.comparePassword)(account.password, (0, auth_1.decryptPassword)(body.password));
     if (!result)
         throw new error_1.ServerError({ data: -1 });
+    const profile = yield profile_1.default.findOne({ accountID: account._id });
     const accessToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, role: account.role } });
     const refreshToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, role: account.role }, type: 'refreshToken' });
     yield accountToken_1.default.findOneAndUpdate({ accountID: account._id }, { $set: { accessToken, refreshToken } }).exec();
     const response = {
-        accountID: account._id,
-        role: account.role
+        account: account,
+        profile: profile
     };
     const cookieOptions = { httpOnly: true };
     res.cookie('x-access-token', accessToken, Object.assign({}, cookieOptions /*, maxAge: 1000 * 60 * 60 * 24 * 365*/));
@@ -77,7 +79,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         url: body.url
     });
     const newAccount = yield account.save();
-    const profile = yield (0, profile_1.addProfile)(newAccount);
+    const profile = yield (0, profile_2.addProfile)(newAccount);
     const accountToken = new accountToken_1.default({
         accountID: account._id
     });

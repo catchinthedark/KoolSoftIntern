@@ -9,7 +9,7 @@ import HomePage from './view/HomePage';
 import AccountsList from './features/account/AccountsList';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { logout, SelectLoginStatus, SelectMe, SelectMyProfile } from './features/me/meSlice';
+import { logout, SelectLoginStatus, SelectMyAccount } from './features/me/meSlice';
 import Cookies from 'js-cookie';
 import { fetchAllAccounts } from './features/account/accountsSlice';
 import { fetchProfiles } from './features/profile/profilesSlice';
@@ -19,12 +19,12 @@ function App() {
 
   const isLogin = useSelector(SelectLoginStatus)
   const loginStatus = Cookies.get('isLogin')
-  const me = useSelector(SelectMe)
+  const account = useSelector(SelectMyAccount)
 
   if (isLogin && !loginStatus) {
     dispatch(logout())
   }
-  if (me.role === 'HR') {
+  if (account.role === 'HR') {
     dispatch(fetchAllAccounts())
     dispatch(fetchProfiles())
   }
@@ -35,7 +35,7 @@ function App() {
     { isLogin ? 
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/me" element={<UserPage user={me} setOpenFlag={null} />} />
+        <Route path="/me" element={<UserPage user={account} setOpenFlag={null} />} />
         <Route path="/accounts" element={<AccountsList />} /> 
         
       </Routes>

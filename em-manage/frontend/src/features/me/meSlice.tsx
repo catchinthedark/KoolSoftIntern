@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { RootState } from "../../app/store"
-import { Account, editAccount } from "../account/accountsSlice"
+import { Account } from "../account/accountsSlice"
 import fetchInterceptors from "../../utils/fetchInterceptors"
-import { editProfile, Profile } from "../profile/profilesSlice"
+import { Profile } from "../profile/profilesSlice"
+import { AES } from "crypto-js"
 
 export const accountDefault: Account = {
     _id: '',
@@ -27,7 +28,7 @@ const profileDefault: Profile = {
 }
 
 const initialState = {
-    me: accountDefault,
+    myAccount: accountDefault,
     myProfile: profileDefault,
     login: false,
     status: 'idle',
@@ -40,47 +41,6 @@ const meSlice = createSlice({
     reducers: {},
     extraReducers(builder: any) {
         builder
-        .addCase(fetchMe.pending, (state: RootState, action: any) => {
-            return {
-                ...state,
-                status: "pending"
-            }
-        })
-        .addCase(fetchMe.fulfilled, (state: RootState, action: any) => {
-            return {
-                ...state,
-                status: "fulfilled",
-                login: true,
-                me: action.payload
-            }
-        })
-        .addCase(fetchMe.rejected, (state: RootState, action: any) => {
-            return {
-                ...state,
-                status: "rejected",
-                error: action.error.message
-            }
-        })
-        .addCase(fetchMyProfile.pending, (state: RootState, action: any) => {
-            return {
-                ...state,
-                status: "pending"
-            }
-        })
-        .addCase(fetchMyProfile.fulfilled, (state: RootState, action: any) => {
-            return {
-                ...state,
-                status: "fulfilled",
-                myProfile: action.payload
-            }
-        })
-        .addCase(fetchMyProfile.rejected, (state: RootState, action: any) => {
-            return {
-                ...state,
-                status: "rejected",
-                error: action.error.message
-            }
-        })
         .addCase(logout.pending, (state: RootState, action: any) => {
             return {
                 ...state,
@@ -90,7 +50,7 @@ const meSlice = createSlice({
         .addCase(logout.fulfilled, (state: RootState, action: any) => {
             return {
                 ...state,
-                me: accountDefault,
+                myAccount: accountDefault,
                 myProfile: profileDefault,
                 login: false,
                 status: 'idle',
@@ -104,49 +64,109 @@ const meSlice = createSlice({
                 error: action.error.message
             }
         })
-        .addCase(editAccount.fulfilled, (state: RootState, action: any) => {
+        .addCase(login.pending, (state: RootState, action: any) => {
             return {
                 ...state,
-                me: action.payload.account
+                status: "pending"
             }
         })
-        .addCase(editProfile.fulfilled, (state: RootState, action: any) => {
+        .addCase(login.fulfilled, (state: RootState, action: any) => {
             return {
                 ...state,
+                myAccount: action.payload.account,
+                myProfile: action.payload.profile,
+                login: true,
+                status: 'fulfilled',
+                error: ''
+            }
+        })
+        .addCase(login.rejected, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "rejected",
+                error: action.error.message
+            }
+        })
+        .addCase(updateMyAccount.pending, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "pending",
+            }
+        })
+        .addCase(updateMyAccount.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "fulfilled",
+                myAccount: action.payload.account
+            }
+        })
+        .addCase(updateMyAccount.rejected, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "rejected",
+                error: action.error.message
+            }
+        })
+        .addCase(updateMyProfile.pending, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "pending",
+            }
+        })
+        .addCase(updateMyProfile.fulfilled, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "fulfilled",
                 myProfile: action.payload.profile
+            }
+        })
+        .addCase(updateMyProfile.rejected, (state: RootState, action: any) => {
+            return {
+                ...state,
+                status: "rejected",
+                error: action.error.message
             }
         })
     }
 })
 
-export const SelectMe = (state: RootState) => state.me.me
+export const SelectMyAccount = (state: RootState) => state.me.myAccount
 export const SelectMyProfile = (state: RootState) => state.me.myProfile
 export const SelectLoginStatus = (state: RootState) => state.me.login
-export const SelectMeStatus = (state: RootState) => state.me.status
+export const SelectMyStatus = (state: RootState) => state.me.status
 export const SelectLoginError = (state: RootState) => state.me.error
-export const SelectRole = (state: RootState) => state.me.me.role
+export const SelectRole = (state: RootState) => state.me.myAccount.role
 
-export const fetchMe = createAsyncThunk('fetch-me', async (accountID: string) => {
+export const updateMyAccount = createAsyncThunk('update-my-account', async(updatedUser : Account) => {
     const { success, data } = await fetchInterceptors({
-        method: 'PUT',
-        url: `/account/get`,
+        method: "PUT",
+        url: `/account/update`,
         baseUrl: `${process.env.REACT_APP_BASE_URL}`,
-        body: {
-            _id: accountID
-        }
-    });
+        body: updatedUser
+    })
     return data
 })
 
-export const fetchMyProfile = createAsyncThunk('fetch-profile', async(accountID: string) => {
+export const updateMyProfile = createAsyncThunk('update-my-profile', async(updatedProfile : Profile) => {
     const { success, data } = await fetchInterceptors({
-        method: 'PUT',
-        url: `/profile/get`,
+        method: "PUT",
+        url: `/profile/update`,
+        baseUrl: `${process.env.REACT_APP_BASE_URL}`,
+        body: updatedProfile
+    })
+    return data
+})
+
+export const login = createAsyncThunk('login', async({ username, password} : {username: string, password: string}) => {
+    const {success, data} = await fetchInterceptors({
+        method: "POST",
+        url: `/auth/login`,
         baseUrl: `${process.env.REACT_APP_BASE_URL}`,
         body: {
-            accountID
+            username,
+            password: AES.encrypt(password, process.env.REACT_APP_ENCRYPTED_KEY!).toString()
         }
-    });
+    })
     return data
 })
 

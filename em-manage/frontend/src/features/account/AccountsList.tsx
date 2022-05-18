@@ -2,12 +2,11 @@ import { Account, removeAccount, SelectAccountsError, SelectAccountsStatus, Sele
 import { Spinner } from "../../utils/spinner"
 import { useSelector } from "react-redux"
 import UserPage from "../me/UserPage"
-import { SelectMe } from "../me/meSlice"
+import { SelectMyAccount } from "../me/meSlice"
 import { useState } from "react"
 
 const AccountPreview = ({ account } : { account: Account }) => {
     const [openFlag, setOpenFlag] = useState<boolean>(false)
-
     return (
         <fieldset className="element">
             <legend>{account.username}</legend>
@@ -28,7 +27,7 @@ const AccountsList = () => {
     const accounts = useSelector(SelectAllAccounts)
     const status = useSelector(SelectAccountsStatus)
     const error = useSelector(SelectAccountsError)
-    const me = useSelector(SelectMe)
+    const myAccount = useSelector(SelectMyAccount)
 
     let content
 
@@ -36,7 +35,7 @@ const AccountsList = () => {
         content = <Spinner text="Pending..." />
     } else if (status === "fulfilled") {
         content = accounts.map(account => (
-            account._id === me._id ? <div/> : <AccountPreview account={account}/>
+            account._id === myAccount._id ? <div/> : <AccountPreview account={account}/>
         ))
     } else if (status === "rejected") {
         content = <div>{error}</div>

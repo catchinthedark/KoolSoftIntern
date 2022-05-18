@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom"
 import { useSelector } from "react-redux"
-import {SelectLoginStatus, SelectMe } from "../features/me/meSlice"
+import {SelectLoginStatus, SelectMyAccount } from "../features/me/meSlice"
 
 const HomePage = () => {
     const isLogin = useSelector(SelectLoginStatus)
-    const me = useSelector(SelectMe)
+    const account = useSelector(SelectMyAccount)
 
     return (
       <div>
@@ -19,7 +19,7 @@ const HomePage = () => {
             </div>
             :
             <div>
-                Welcome to KoolSoft page {me.personalInfo.firstName}!
+                Welcome to KoolSoft page {account.personalInfo.firstName}!
             </div>
         }  
       </div>

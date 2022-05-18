@@ -2,6 +2,7 @@ import { Response, Request } from "express"
 import { AuthRequest } from '../../common/request'
 import Account from "../../types/account"
 import accountModel from "../../models/account"
+import profileModel from "../../models/profile"
 import accountTokenModel from "../../models/accountToken"
 import { ServerError } from "../../common/error"
 import { comparePassword, decryptPassword, encryptPassword } from "../../middlewares/auth"
@@ -18,14 +19,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!account) throw new ServerError({ data: -1 })
     const result = await comparePassword(account.password, decryptPassword(body.password))
     if (!result) throw new ServerError({ data: -1 })
+    const profile = await profileModel.findOne({ accountID: account._id })
 
     const accessToken = signCredentials({ credentials: { accountID: account._id, role: account.role } })
     const refreshToken = signCredentials({ credentials: { accountID: account._id, role: account.role }, type: 'refreshToken' })
     await accountTokenModel.findOneAndUpdate({ accountID: account._id }, { $set: { accessToken, refreshToken } }).exec()
 
     const response = {
-        accountID: account._id, 
-        role: account.role
+        account: account,
+        profile: profile
     }
     const cookieOptions = { httpOnly: true }
     res.cookie('x-access-token', accessToken, { ...cookieOptions/*, maxAge: 1000 * 60 * 60 * 24 * 365*/ })

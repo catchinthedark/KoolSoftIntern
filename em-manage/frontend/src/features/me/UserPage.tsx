@@ -2,9 +2,9 @@ import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { RootState } from "../../app/store"
-import { Account, ContactInfo, editAccount, PersonalInfo } from "../account/accountsSlice"
-import { Profile, PastWork, CVNote, WorkInfo, PastDegree, editProfile, SelectProfileByAccount } from "../profile/profilesSlice"
-import { logout, SelectMe } from "./meSlice"
+import { Account, ContactInfo, updateAccount, PersonalInfo, SelectAllAccounts } from "../account/accountsSlice"
+import { Profile, PastWork, CVNote, WorkInfo, PastDegree, updateProfile, SelectProfileByAccount, SelectAllProfiles } from "../profile/profilesSlice"
+import { logout, SelectMyAccount, SelectMyProfile, updateMyAccount, updateMyProfile } from "./meSlice"
 
 const UpdateInfo = <T, X, >(info: T, updatedField: string, value: X) : T => {
     const updatedInfo : T = {...info, [updatedField] : value}
@@ -30,9 +30,15 @@ const UserPage = ({ user, setOpenFlag } : { user : Account, setOpenFlag: any }) 
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const me = useSelector(SelectMe)
-    const profile = useSelector((state: RootState) => SelectProfileByAccount(user, state))
-    
+    const account = useSelector(SelectMyAccount)
+    let profile : Profile
+    const aProfile : Profile | undefined = useSelector((state: RootState) => SelectProfileByAccount(user, state))
+    const myProfile : Profile = useSelector(SelectMyProfile)
+    if (account === user) profile = myProfile
+        else profile = aProfile!
+    const accounts : Account[] = useSelector(SelectAllAccounts)
+    const profiles : Profile[] = useSelector(SelectAllProfiles)
+
     const [updatedUser, setUpdatedUser] = useState<Account>(user)
     const [updatedProfile, setUpdatedProfile] = useState<Profile>(profile!)
     const [roleFlag, setRoleFlag] = useState<boolean>(true)
@@ -56,12 +62,14 @@ const UserPage = ({ user, setOpenFlag } : { user : Account, setOpenFlag: any }) 
     }
 
     const onSaveEditAccountClicked = async() => {
-        dispatch(editAccount(updatedUser))
+        if (user === account) dispatch(updateMyAccount(updatedUser))
+            else dispatch(updateAccount({ accounts, updatedUser }))
         navigate("/")
     }
 
     const onSaveEditProfileClicked = async() => {
-        dispatch(editProfile(updatedProfile))
+        if (user === account) dispatch(updateMyProfile(updatedProfile))
+            else dispatch(updateProfile({ profiles, updatedProfile }))
         navigate("/")
     }
 
@@ -307,7 +315,7 @@ const UserPage = ({ user, setOpenFlag } : { user : Account, setOpenFlag: any }) 
             Save Edit Account
         </button>
         {
-            user.role === 'Applicant' && me.role === 'HR' ? 
+            user.role === 'Applicant' && account.role === 'HR' ? 
             <fieldset>
                 <legend>CV Note</legend>
                 <div className="status-element">
@@ -396,7 +404,7 @@ const UserPage = ({ user, setOpenFlag } : { user : Account, setOpenFlag: any }) 
                 </button>
             </div>
             {
-                me.role === 'HR' ? 
+                account.role === 'HR' ? 
                 <div>
                     <label form="salary">Salary</label>
                     <input 
@@ -861,7 +869,7 @@ const UserPage = ({ user, setOpenFlag } : { user : Account, setOpenFlag: any }) 
         </button>
         <br></br>
         {
-            user === me ? 
+            user === account ? 
             <button onClick={onLogOutClicked} style={{ padding: '0.5rem 1rem', color:"white", textDecoration: 'none', backgroundColor: "darkolivegreen" }}>
                 Log Out
             </button>

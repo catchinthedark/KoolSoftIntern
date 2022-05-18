@@ -87,20 +87,20 @@ const profilesSlice = createSlice({
                 error: ''
             }
         })
-        .addCase(editProfile.pending, (state: RootState, action: any) => {
+        .addCase(updateProfile.pending, (state: RootState, action: any) => {
             return {
                 ...state,
                 status: "pending"
             }
         })
-        .addCase(editProfile.fulfilled, (state: RootState, action: any) => {
+        .addCase(updateProfile.fulfilled, (state: RootState, action: any) => {
             return {
                 ...state,
                 status: "fullfilled",
-                profiles: action.payload.profiles
+                profiles: action.payload
             }
         })
-        .addCase(editProfile.rejected, (state: RootState, action: any) => {
+        .addCase(updateProfile.rejected, (state: RootState, action: any) => {
             return {
                 ...state,
                 status: "rejected",
@@ -126,14 +126,17 @@ export const fetchProfiles = createAsyncThunk('fetch-all-profiles', async() => {
     return null;
 })
 
-export const editProfile = createAsyncThunk('edit-profile', async(updatedProfile: Profile) => {
+export const updateProfile = createAsyncThunk('update-profile', async({profiles, updatedProfile}: {profiles: Profile[], updatedProfile: Profile}) => {
     const { success, data } = await fetchInterceptors({
         method: "PUT",
         url: `/profile/update`,
         baseUrl: `${process.env.REACT_APP_BASE_URL}`,
         body: updatedProfile
     })
-    return data
+    if (!success) return null
+    const updatedProfiles = profiles.map(profile => profile._id === updatedProfile._id ? updatedProfile : profile)
+    return updatedProfiles
+
 })
 
 export const SelectAllProfiles = (state: RootState) => state.profiles.profiles

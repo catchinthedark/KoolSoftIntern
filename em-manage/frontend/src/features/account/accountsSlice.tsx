@@ -70,20 +70,20 @@ const accountsSlice = createSlice({
                 error: ''
             }
         })
-        .addCase(editAccount.pending, (state: RootState, action: any) => {
+        .addCase(updateAccount.pending, (state: RootState, action: any) => {
             return {
                 ...state,
                 status: "pending"
             }
         })
-        .addCase(editAccount.fulfilled, (state: RootState, action: any) => {
+        .addCase(updateAccount.fulfilled, (state: RootState, action: any) => {
             return {
                 ...state,
-                status: "fullfilled",
-                accounts: action.payload.accounts
+                status: "fulfilled",
+                accounts: action.payload
             }
         })
-        .addCase(editAccount.rejected, (state: RootState, action: any) => {
+        .addCase(updateAccount.rejected, (state: RootState, action: any) => {
             return {
                 ...state,
                 status: "rejected",
@@ -122,14 +122,16 @@ export const fetchAllAccounts = createAsyncThunk('fetch-all-accounts', async() =
     return null;
 })
 
-export const editAccount = createAsyncThunk('edit-account', async(updatedUser: Account) => {
+export const updateAccount = createAsyncThunk('update-account', async({ accounts, updatedUser } : { accounts: Account[], updatedUser: Account }) => {
     const { success, data } = await fetchInterceptors({
         method: "PUT",
         url: `/account/update`,
         baseUrl: `${process.env.REACT_APP_BASE_URL}`,
         body: updatedUser
     })
-    return data
+    if (!success) return null
+    const updatedAccounts = accounts.map(account => account._id === updatedUser._id ? updatedUser : account)
+    return updatedAccounts
 })
 
 export const removeAccount = createAsyncThunk('remove-account', async(accountID: string) => {

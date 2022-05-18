@@ -1,10 +1,7 @@
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { AES } from 'crypto-js'
-import { message } from 'antd'
-import { fetchMe, fetchMyProfile, SelectLoginError } from "./meSlice"
-import fetchInterceptors from "../../utils/fetchInterceptors"
+import { login, SelectLoginError } from "./meSlice"
 
 const LogInForm = () => {
     const [username, setUsername] = useState('')
@@ -16,22 +13,8 @@ const LogInForm = () => {
 
     const onLogInClicked = async () => {
         if (!username || !password) return
-        const {success, data} = await fetchInterceptors({
-            method: "POST",
-            url: `/auth/login`,
-            baseUrl: `${process.env.REACT_APP_BASE_URL}`,
-            body: {
-                username,
-                password: AES.encrypt(password, process.env.REACT_APP_ENCRYPTED_KEY!).toString()
-            }
-        })
-        if (success) {
-            dispatch(fetchMe(data.accountID))
-            dispatch(fetchMyProfile(data.accountID))
-            navigate('/')
-        } else {
-            message.error(data)
-        }
+        dispatch(login({username, password}))
+        navigate('/')
     }
 
     const onSignUpClicked = () => {
