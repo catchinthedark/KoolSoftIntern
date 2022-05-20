@@ -24,11 +24,11 @@ const profile_2 = require("../profile");
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     const account = yield account_1.default.findOne({ username: body.username });
-    if (!account)
-        throw new error_1.ServerError({ data: -1 });
+    if (account === null)
+        return (0, response_1.failureResponse)(res, { data: { message: "can't find account with this username" } });
     const result = yield (0, auth_1.comparePassword)(account.password, (0, auth_1.decryptPassword)(body.password));
-    if (!result)
-        throw new error_1.ServerError({ data: -1 });
+    if (result === null)
+        return (0, response_1.failureResponse)(res, { data: { message: "wrong password" } });
     const profile = yield profile_1.default.findOne({ accountID: account._id });
     const accessToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, role: account.role } });
     const refreshToken = (0, jwtHelper_1.signCredentials)({ credentials: { accountID: account._id, role: account.role }, type: 'refreshToken' });

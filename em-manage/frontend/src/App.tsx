@@ -13,6 +13,7 @@ import { logout, SelectLoginStatus, SelectMyAccount } from './features/me/meSlic
 import Cookies from 'js-cookie';
 import { fetchAllAccounts, SelectAccountsStatus } from './features/account/accountsSlice';
 import { fetchProfiles, SelectProfilesStatus } from './features/profile/profilesSlice';
+import { useEffect } from 'react';
 
 function App() {
   const dispatch = useDispatch()
@@ -39,7 +40,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/me" element={<UserPage user={account} setOpenFlag={null} />} />
         <Route path="/accounts" element={<AccountsList />} /> 
-        
+        <Route path="/login" element={<LogInForm />} />
       </Routes>
       :
       <Routes>

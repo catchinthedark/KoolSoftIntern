@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import { RootState } from "../../app/store"
+import { AppThunk, RootState } from "../../app/store"
 import { Account } from "../account/accountsSlice"
 import fetchInterceptors from "../../utils/fetchInterceptors"
 import { Profile } from "../profile/profilesSlice"
@@ -44,7 +44,8 @@ const meSlice = createSlice({
         .addCase(logout.pending, (state: RootState, action: any) => {
             return {
                 ...state,
-                status: "pending"
+                status: "pending",
+                error: ''
             }
         })
         .addCase(logout.fulfilled, (state: RootState, action: any) => {
@@ -67,7 +68,8 @@ const meSlice = createSlice({
         .addCase(login.pending, (state: RootState, action: any) => {
             return {
                 ...state,
-                status: "pending"
+                status: "pending",
+                error: ''
             }
         })
         .addCase(login.fulfilled, (state: RootState, action: any) => {
@@ -84,7 +86,8 @@ const meSlice = createSlice({
             return {
                 ...state,
                 status: "rejected",
-                error: action.error.message
+                login: false,
+                error: action.payload
             }
         })
         .addCase(updateMyAccount.pending, (state: RootState, action: any) => {
@@ -157,7 +160,7 @@ export const updateMyProfile = createAsyncThunk('update-my-profile', async(updat
     return data
 })
 
-export const login = createAsyncThunk('login', async({ username, password} : {username: string, password: string}) => {
+export const login = createAsyncThunk('login', async({ username, password} : {username: string, password: string}, { rejectWithValue }) => {
     const {success, data} = await fetchInterceptors({
         method: "POST",
         url: `/auth/login`,
@@ -167,6 +170,7 @@ export const login = createAsyncThunk('login', async({ username, password} : {us
             password: AES.encrypt(password, process.env.REACT_APP_ENCRYPTED_KEY!).toString()
         }
     })
+    if (!success) return rejectWithValue(data.message)
     return data
 })
 

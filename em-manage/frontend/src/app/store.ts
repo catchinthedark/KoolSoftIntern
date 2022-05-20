@@ -1,4 +1,5 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
+import { configureStore, ThunkAction, Action, ThunkDispatch } from '@reduxjs/toolkit';
+import { useDispatch } from 'react-redux';
 import { combineReducers } from 'redux';
 import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
@@ -10,11 +11,18 @@ import profilesSlice from '../features/profile/profilesSlice';
 const persistConfig = {
   key: 'primary',
   storage,
+  blacklist: ['me']
+}
+
+const mePersistConfig = {
+  key: 'me',
+  storage,
+  blacklist: ['error']
 }
 
 const reducers = combineReducers({
   accounts: accountsSlice,
-  me: meSlice,
+  me: persistReducer(mePersistConfig, meSlice),
   profiles: profilesSlice
 })
 
@@ -25,6 +33,8 @@ export const store = configureStore({
 });
 
 export type AppDispatch = typeof store.dispatch;
+export type ThunkAppDispatch = ThunkDispatch<RootState, void, Action>;
+export const useAppThunkDispatch = () => useDispatch<ThunkAppDispatch>();
 export type RootState = ReturnType<typeof store.getState>;
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,

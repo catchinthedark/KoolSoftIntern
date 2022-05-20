@@ -6,7 +6,7 @@ import profileModel from "../../models/profile"
 import accountTokenModel from "../../models/accountToken"
 import { ServerError } from "../../common/error"
 import { comparePassword, decryptPassword, encryptPassword } from "../../middlewares/auth"
-import { successResponse } from "../../common/response"
+import { failureResponse, successResponse } from "../../common/response"
 import { signCredentials } from "../../middlewares/jwtHelper"
 import AccountToken from "../../types/accountToken"
 import Profile from "../../types/profile"
@@ -16,9 +16,9 @@ import mongoose from "mongoose"
 export const login = async (req: Request, res: Response): Promise<void> => {
     const body = req.body as Pick<Account, "username" | "password">
     const account = await accountModel.findOne({ username: body.username })
-    if (!account) throw new ServerError({ data: -1 })
+    if (account === null) return failureResponse(res, {data : {message: "can't find account with this username"}})
     const result = await comparePassword(account.password, decryptPassword(body.password))
-    if (!result) throw new ServerError({ data: -1 })
+    if (result === null) return failureResponse(res, {data : {message: "wrong password"}})
     const profile = await profileModel.findOne({ accountID: account._id })
 
     const accessToken = signCredentials({ credentials: { accountID: account._id, role: account.role } })

@@ -24,7 +24,6 @@ const fetchInterceptors = async (args: { method?: string; url: string; baseUrl: 
     const response = await fetch(`${baseUrl}${url}`, config);
     const status = response.status;
     const rspBody = await response.json();
-  
     if (status === 401 && rspBody?.data === -1) {
       console.log("refresh token...")
       refreshTokenRequest = refreshTokenRequest ? refreshTokenRequest : refreshToken(baseUrl)

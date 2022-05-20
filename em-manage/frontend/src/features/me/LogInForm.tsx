@@ -1,25 +1,31 @@
-import { useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useEffect, useState } from "react"
+import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { login, SelectLoginError } from "./meSlice"
+import { useAppThunkDispatch } from "../../app/store"
+import { login, SelectLoginError, SelectLoginStatus } from "./meSlice"
 
 const LogInForm = () => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('') 
     const loginError = useSelector(SelectLoginError)
+    const loginStatus = useSelector(SelectLoginStatus)
 
-    const dispatch = useDispatch()
+    const dispatch = useAppThunkDispatch()
     const navigate = useNavigate()
 
     const onLogInClicked = async () => {
         if (!username || !password) return
-        dispatch(login({username, password}))
-        navigate('/')
+        dispatch(login({username, password})) 
     }
 
     const onSignUpClicked = () => {
         navigate('/signup')
     }
+
+    useEffect(() => {
+        if (loginStatus) navigate('/')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [loginStatus])
 
     return (
         <form onSubmit={(e) => {e.preventDefault();}} autoComplete="off">
