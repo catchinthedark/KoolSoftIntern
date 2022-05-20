@@ -143,5 +143,6 @@ export const SelectAllProfiles = (state: RootState) => state.profiles.profiles
 export const SelectProfileByAccount = (account: Account, state: RootState) => {
     return state.profiles.profiles.find(profile => profile.accountID === account._id)
 }
+export const SelectProfilesStatus = (state: RootState) => state.profiles.status
 
 export default profilesSlice.reducer

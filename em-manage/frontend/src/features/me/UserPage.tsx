@@ -29,13 +29,10 @@ const UserPage = ({ user, setOpenFlag } : { user : Account, setOpenFlag: any }) 
     useDispatch()
     const navigate = useNavigate()
     const dispatch = useDispatch()
-
     const account = useSelector(SelectMyAccount)
-    let profile : Profile
-    const aProfile : Profile | undefined = useSelector((state: RootState) => SelectProfileByAccount(user, state))
     const myProfile : Profile = useSelector(SelectMyProfile)
-    if (account === user) profile = myProfile
-        else profile = aProfile!
+    const aProfile : Profile | undefined = useSelector((state: RootState) => SelectProfileByAccount(user, state))
+    let profile : Profile = account === user ? myProfile : aProfile!
     const accounts : Account[] = useSelector(SelectAllAccounts)
     const profiles : Profile[] = useSelector(SelectAllProfiles)
 
