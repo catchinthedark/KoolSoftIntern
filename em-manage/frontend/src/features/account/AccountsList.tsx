@@ -1,12 +1,13 @@
 import { Account, removeAccount, SelectAccountsError, SelectAccountsStatus, SelectAllAccounts } from "./accountsSlice"
 import { Spinner } from "../../utils/spinner"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import UserPage from "../me/UserPage"
 import { SelectMyAccount } from "../me/meSlice"
 import { useState } from "react"
 
 const AccountPreview = ({ account } : { account: Account }) => {
     const [openFlag, setOpenFlag] = useState<boolean>(false)
+    const dispatch = useDispatch()
     return (
         <fieldset className="element">
             <legend>{account.username}</legend>
@@ -16,7 +17,7 @@ const AccountPreview = ({ account } : { account: Account }) => {
                 View Account
             </button>
             { openFlag && <UserPage user={account} setOpenFlag={setOpenFlag}/>}
-            <button onClick={() => removeAccount(account._id)} style={{ padding: '0.5rem 1rem', textDecoration: 'none', color:"white", backgroundColor: "darkolivegreen" }}>
+            <button onClick={() => dispatch(removeAccount(account._id))} style={{ padding: '0.5rem 1rem', textDecoration: 'none', color:"white", backgroundColor: "darkolivegreen" }}>
                 Remove Account
             </button>
         </fieldset>
